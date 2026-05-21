@@ -1,0 +1,189 @@
+import { Link, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import NotificationDropdown from "./NotificationDropDown";
+
+function Admin_Layout({ children }) {
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+
+    navigate("/");
+  };
+
+  useEffect(() => {
+
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");  
+
+  if (!token) {
+
+    navigate("/");
+    alert("Please log in to access the dashboard.");
+  }
+
+  }, []);
+
+  return(
+
+        <div className="min-h-screen flex bg-gray-100">
+
+      {/* Sidebar */}
+      <div className="  
+        fixed
+        top-0
+        left-0
+        h-screen
+        w-64
+        bg-gradient-to-b
+        from-emerald-950
+        via-green-900
+        to-emerald-800
+        text-white
+        p-6
+        hidden
+        md:block
+        shadow-2xl">
+
+        <h1 className="text-2xl font-bold mb-10">
+          Admin Panel
+        </h1>
+
+        <nav className="space-y-4">
+
+          <Link
+            to="/admin/dashboard"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Dashboard
+          </Link>
+
+          <Link
+            to="/admin/users"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Users
+          </Link>
+
+          <Link
+            to="/admin/sales"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Dataset
+          </Link>
+
+          <Link
+            to="/admin/forecasts"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Forecast 
+          </Link>
+
+          <Link
+            to="/admin/reports"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Reports
+          </Link>
+
+          <Link
+            to="/admin/summary"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Summary
+          </Link>
+
+          <div className="       
+          block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition">
+             <NotificationDropdown />
+          </div>
+
+          <button
+            onClick={handleLogout}
+            className="
+            mt-10
+            w-full
+            bg-white/10
+            border
+            border-white/20
+            px-4
+            py-3
+            rounded-2xl
+            hover:bg-red-500
+            hover:border-red-500
+            transition
+            font-semibold
+            backdrop-blur-md
+          "
+          >
+            Logout
+          </button>
+
+        </nav>
+
+      </div>
+
+      {/* Page Content */}
+      <div className="ml-64 flex-1 p-6">
+
+        {children}
+
+      </div>
+
+    </div>
+
+  );
+
+}
+
+export default Admin_Layout;
