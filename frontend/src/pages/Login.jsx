@@ -36,10 +36,10 @@ function Login() {
   localStorage.setItem("role", (response.data.data.role));
   const role = response.data.data.role;
   
-  if (role === "admin") {
+  if (role === "super_admin") {
     navigate("/admin/dashboard")
   }
-  else {
+  else if(role === "analyst" || role === "viewer") {
     navigate("/dashboard")
 }
   toast.success("Login successful!");

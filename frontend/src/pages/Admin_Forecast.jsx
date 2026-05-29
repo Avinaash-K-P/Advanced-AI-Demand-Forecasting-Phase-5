@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import AdminLayout from "../components/Admin_Layout";
+import Layout from "../components/Layout";
 
 function AdminForecast() {
   const [forecastData, setForecastData] = useState([]);
@@ -32,7 +32,6 @@ const clearFilters = () => {
         end_date: ""
     })
 }
-  
 
   const fetchForecastData = async () => {
     try {
@@ -68,7 +67,7 @@ const clearFilters = () => {
 
   return (
 
-    <AdminLayout>
+    <Layout>
          <div className="p-6">
 
             <h1 className="text-3xl font-bold mb-6">
@@ -268,7 +267,7 @@ const clearFilters = () => {
         </div>            
 
   
-    </AdminLayout>
+    </Layout>
 
   )
 

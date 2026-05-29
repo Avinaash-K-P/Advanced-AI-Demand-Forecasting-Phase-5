@@ -2,7 +2,7 @@ import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
-import Admin_Layout from "../components/Admin_Layout";
+import Layout from "../components/Layout";
 import {useState,useEffect} from "react"
 import axios from "axios";
 
@@ -205,7 +205,7 @@ useEffect(() => {
 
 return (
 
-        <Admin_Layout>
+        <Layout>
 
             <div className="p-6">
 
@@ -413,7 +413,7 @@ return (
 
             </div>
 
-        </Admin_Layout>
+        </Layout>
     );
 }
 

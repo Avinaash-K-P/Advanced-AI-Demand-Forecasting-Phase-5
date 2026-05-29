@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/User_Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import UploadDataset from './pages/UploadDataset';
@@ -11,6 +11,8 @@ import AdminSales from './pages/Admin_Sales';
 import AdminForecast from './pages/Admin_Forecast';
 import AdminReports from './pages/Admin_Reports';
 import DownloadSummary from './pages/Analytics_Summary';
+import Unauthorized from './pages/Unauthorized';
+import ProtectedRoute from './components/Protected_routes';
 
 function App() {
 
@@ -32,51 +34,98 @@ function App() {
 
         <Route
           path="/dashboard"
-          element={<Dashboard />}
+          element={
+            <ProtectedRoute allowedRoles={["analyst","viewer"]}>
+                   <Dashboard />
+            </ProtectedRoute>
+        }
         />
 
         <Route
           path="/upload"
-          element={<UploadDataset />}
+          element={
+            <ProtectedRoute allowedRoles={["analyst"]}>
+                   <UploadDataset />
+            </ProtectedRoute>
+
+          }
         />
 
         <Route
           path="/forecast"
-          element={<Forecast />}
+          element={
+            <ProtectedRoute allowedRoles={["analyst"]}>
+                   <Forecast/>
+            </ProtectedRoute>
+          }
         />
 
         <Route
           path="/reports"
-          element={<Reports />}
+          element={
+            <ProtectedRoute allowedRoles={["analyst","viewer"]}>
+                   <Reports />
+            </ProtectedRoute>  
+
+          }
         />
 
         <Route
           path="/admin/dashboard"
-          element={<AdminDashboard />}
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+                   <AdminDashboard />
+            </ProtectedRoute>
+          }
         />
 
         <Route
           path="/admin/users"
-          element={<AdminUsers />}
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+                   <AdminUsers />
+            </ProtectedRoute>
+          }
         />
 
         <Route
           path="/admin/sales"
-          element={<AdminSales />}
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+                   <AdminSales />
+            </ProtectedRoute>
+          }
         />
 
           <Route
           path="/admin/forecasts"
-          element={<AdminForecast />}
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+                   <AdminForecast />
+            </ProtectedRoute>
+          }
         />
           <Route
           path="/admin/reports"
-          element={<AdminReports />}
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+                   <AdminReports />
+            </ProtectedRoute>
+          }
         />
 
         <Route
-        path="/admin/summary"
-        element={<DownloadSummary/>}
+        path="/download-summary"
+        element={
+            <ProtectedRoute allowedRoles={["super_admin","analyst","viewer"]}>
+                   <DownloadSummary />
+            </ProtectedRoute>
+        }
+        />
+
+        <Route 
+        path="/unauthorized"
+        element={<Unauthorized/>}
         />
 
       </Routes>

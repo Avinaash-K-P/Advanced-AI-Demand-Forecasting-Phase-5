@@ -10,7 +10,7 @@ function Forecast() {
   const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [forecastDays, setForecastDays] = useState(30);
-
+  
   // Generate Forecast
   const generateForecast = async () => {
 
@@ -21,10 +21,6 @@ function Forecast() {
       const response = await axios.get(
         "http://127.0.0.1:8000/forecast/generate-forecast",
         {
-          params:
-          {
-            forecast_days: forecastDays
-          },
           headers: {
             Authorization:
               `Bearer ${localStorage.getItem("token")}`
@@ -62,55 +58,6 @@ function Forecast() {
           Forecast Generation
         </h1>
 
-<div className="mb-4">
-
-    <label className="
-        block
-        mb-2
-        font-semibold
-    ">
-
-        Forecast Duration
-
-    </label>
-
-    <select
-
-        value={forecastDays}
-
-        onChange={(e) =>
-            setForecastDays(
-                e.target.value
-            )
-        }
-
-        className="
-            border
-            rounded-xl
-            p-3
-            w-full
-        "
-    >
-
-        <option value={7}>
-            7 Days
-        </option>
-
-        <option value={30}>
-            30 Days
-        </option>
-
-        <option value={90}>
-            90 Days
-        </option>
-
-        <option value={180}>
-            180 Days
-        </option>
-
-    </select>
-
-</div>
 
         {/* Generate Button */}
         <button

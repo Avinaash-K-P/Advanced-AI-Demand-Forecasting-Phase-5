@@ -2,20 +2,21 @@ import { useState, useEffect } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
-import ChartsAndGraphs from "../components/charts_and_graphs"
+import DashboardAnalytics from "../components/Dashboard_Analytics";
+import React from "react";
 
-function Dashboard() {
+function Dashboard({darkMode}) {
 
   const username = localStorage.getItem("username"); // To display username in the dashboard
 
 return (
   <Layout>
-    
-   <div className="min-h-screen bg-gray-100 p-6">
+   <div className="p-6"> 
+   {/*<div className="min-h-screen bg-gray-100 p-6">*/}
 
       {/* Header */}
       <h1 className="text-4xl font-bold mb-8">
-        AI Demand Forecast Dashboard
+        User Dashboard
       </h1>
 
         {/* Welcome Message */}
@@ -98,7 +99,9 @@ return (
 
 </div>
 
-  <ChartsAndGraphs />
+  <DashboardAnalytics 
+    darkMode = {darkMode}
+  />
 
 </div> 
 

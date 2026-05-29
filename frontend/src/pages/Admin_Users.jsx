@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import AdminLayout from "../components/Admin_Layout";
+import Layout from "../components/Layout";
+import { useNavigate } from "react-router-dom";
 
 function AdminUsers() {
 
@@ -54,7 +55,7 @@ useEffect(() => {
 
 return(
 
-    <AdminLayout>
+    <Layout>
 
     <div className="p-6">
 
@@ -184,12 +185,16 @@ return(
                 All Roles
             </option>
 
-            <option value="admin">
-                Admin
+            <option value="super_admin">
+                Super admin
             </option>
 
-            <option value="user">
-                User
+            <option value="analyst">
+                Analyst
+            </option>
+
+            <option value="viewer">
+                Viewer
             </option>
 
         </select>
@@ -221,6 +226,10 @@ return(
 
                             <th className="p-4 text-left">
                                 Role
+                            </th>
+
+                            <th className="p-4 text-left">
+                                Actions
                             </th>
 
                         </tr>
@@ -265,6 +274,32 @@ return(
 
                                 </td>
 
+                                <td className="p-4">
+                <button
+
+        onClick={() =>
+            navigate(
+                `/edit-user/${user.id}`
+            )
+        }
+
+        className="
+            px-4
+            py-2
+            rounded-xl
+            bg-blue-600
+            hover:bg-blue-700
+            text-white
+            transition
+        "
+    >
+
+        Edit
+
+            </button>
+
+                                </td>
+
                             </tr>
 
                         ))}
@@ -277,7 +312,7 @@ return(
 
     </div>        
 
-    </AdminLayout>
+    </Layout>
 
 );
 

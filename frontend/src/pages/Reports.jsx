@@ -194,12 +194,12 @@ useEffect(() => {
 
 
     {/* Forecast Table Card */}
-    <div className="
+    <div className={`
         bg-white
         rounded-2xl
         shadow-lg
         overflow-hidden
-    ">
+    `}>
 
         {/* Table Header */}
         <div className="

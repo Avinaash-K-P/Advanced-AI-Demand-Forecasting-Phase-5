@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import AdminLayout from "../components/Admin_Layout";
+import Layout from "../components/Layout";
 
 function AdminReports() {
   const [reportData, setReportData] = useState([]);
@@ -28,7 +28,7 @@ function AdminReports() {
 
   return (
 
-    <AdminLayout>
+    <Layout>
          <div className="p-6">
 
             <h1 className="text-3xl font-bold mb-6">
@@ -100,7 +100,7 @@ function AdminReports() {
         </div>            
 
   
-    </AdminLayout>
+    </Layout>
 
   )
 

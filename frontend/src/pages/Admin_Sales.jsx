@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-import AdminLayout from "../components/Admin_Layout";
+import Layout from "../components/Layout";
 
 function AdminSales() {
   const [salesData, setSalesData] = useState([]);
@@ -11,6 +11,7 @@ function AdminSales() {
   const skip = (currentPage - 1) * limit;
   const [total,setTotal] = useState(0);
   const totalPages = Math.ceil(total / limit)
+
 
   //Filters
   const [filters, setFilters] = useState({
@@ -84,7 +85,7 @@ const clearFilters = () => {
 
   return (
 
-    <AdminLayout>
+    <Layout>
          <div className="p-6">
 
             <h1 className="text-3xl font-bold mb-6">
@@ -187,21 +188,19 @@ const clearFilters = () => {
             "
         >
 
-            <option value="">
-                All Categories
-            </option>
-
-            <option value="Electronic">
-                Electronics
-            </option>
-
-            <option value="Furniture">
-                Furnitures
-            </option>
-
-            <option value="Clothing">
-                Clothing
-            </option>
+            <option value = "">All Categories</option>
+            
+            <option value = "Clothing">Clothing</option>
+            
+            <option value = "Electronics">Electronics</option>
+            
+            <option value = "Groceries">Groceries</option>
+            
+            <option value = "Home">Home</option>
+            
+            <option value = "Sports">Sports</option>
+            
+            <option value = "Toys">Toys</option>
 
         </select>
 
@@ -420,7 +419,7 @@ const clearFilters = () => {
         
         </div>            
   
-    </AdminLayout>
+    </Layout>
 
   )
 

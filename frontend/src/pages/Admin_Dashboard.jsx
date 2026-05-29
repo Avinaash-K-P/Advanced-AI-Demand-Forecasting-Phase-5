@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
-import AdminLayout from "../components/Admin_Layout";
-import ChartsAndGraphs from "../components/charts_and_graphs";
+import Layout from "../components/Layout";
+import DashboardAnalytics from "../components/Dashboard_Analytics";
+import React from "react";
 
-function AdminDashboard() { 
+function AdminDashboard({darkMode}) { 
 
 const [dashboardData, setDashboardData] = useState({})
 const username = localStorage.getItem("username"); // To display username in the dashboard
@@ -39,13 +40,13 @@ useEffect(() => {
 
  return (
 
-    <AdminLayout>
+    <Layout>
 
-        <div className="min-h-screen bg-gray-100 p-6">
-
+        {/*<div className="min-h-screen bg-gray-100 p-6">*/}
+<div className="p-6">
              {/* Header */}
       <h1 className="text-4xl font-bold mb-8">
-        AI Demand Forecast Admin Dashboard
+        Admin Dashboard
       </h1>
 
         {/* Welcome Message */}
@@ -171,12 +172,14 @@ useEffect(() => {
             </div>
 
               <br/>  
-              <ChartsAndGraphs />         
+              <DashboardAnalytics
+                  darkMode = {darkMode}
+              />         
 
         </div>
 
 
-    </AdminLayout>
+    </Layout>
 )
 }
 
