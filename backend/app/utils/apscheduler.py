@@ -13,7 +13,7 @@ scheduler.add_job(
     "interval",
 
     minutes=10
-    #seconds = 10 (For testing purpose) 
+    #seconds = 120 
 )
 
 scheduler.start()

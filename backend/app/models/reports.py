@@ -1,10 +1,5 @@
-from sqlalchemy import Column
-from sqlalchemy import Integer
-from sqlalchemy import String
-from sqlalchemy import DateTime
-
+from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
-
 from app.db.session import Base
 
 
@@ -22,7 +17,4 @@ class Report(Base):
 
     generated_by = Column(String(100))
 
-    created_at = Column(
-        DateTime,
-        default=datetime.utcnow
-    )
+    created_at = Column(DateTime,default=datetime.utcnow)

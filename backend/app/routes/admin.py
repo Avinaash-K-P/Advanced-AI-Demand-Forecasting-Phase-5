@@ -4,7 +4,7 @@ from sqlalchemy import func
 from app.db.database import get_db
 from app.utils.response import success_response
 from app.utils.pagination import paginator
-from app.core.security import verify_admin
+from app.core.security import verify_role
 from app.models.forecast import ForecastResult
 from app.models.user import User
 from app.models.sales import Sales
@@ -15,11 +15,11 @@ from datetime import datetime
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
-# Dashboard - Admin Only
+# Dashboard 
 @router.get("/dashboard")
 def admin_dashboard(
     db: Session = Depends(get_db), 
-    admin = Depends(verify_admin)
+    admin = Depends(verify_role(["super_admin"]))
 ):
     total_users = db.query(User).count()
     total_datasets = db.query(Sales).count()
@@ -35,14 +35,14 @@ def admin_dashboard(
         }
         )
 
-# List All Users - Admin Only
+# List All Users 
 @router.get("/users")
 def list_users(
     id: int = None,
     username:str=None,
     role:str=None,
     db: Session = Depends(get_db), 
-    admin = Depends(verify_admin)
+    admin = Depends(verify_role(["super_admin"]))
 ):
     query = db.query(User)
     
@@ -61,7 +61,7 @@ def list_users(
         data= data
     )
 
-# List All Sales - Admin Only
+# List All Sales 
 @router.get("/sales")
 def list_sales(
     skip: int = 0,
@@ -72,7 +72,7 @@ def list_sales(
     end_date: str = None,
     region:str = None,
     db: Session = Depends(get_db), 
-    admin = Depends(verify_admin)
+    admin = Depends(verify_role(["super_admin"]))
 ):
     query = db.query(Sales) 
 
@@ -97,11 +97,11 @@ def list_sales(
         data= data
     )
 
-# View Reports - Admin Only
+# View Reports 
 @router.get("/reports")
 def view_reports(
     db: Session = Depends(get_db), 
-    admin = Depends(verify_admin)
+    admin = Depends(verify_role(["super_admin"]))
 ):
     reports_folder = "reports"
     
@@ -134,7 +134,7 @@ def view_reports(
     )        
 
 
-# List All Forecasts - Admin Only
+# List All Forecasts 
 @router.get("/forecasts")
 def list_forecasts(
     skip: int = 0,
@@ -142,7 +142,7 @@ def list_forecasts(
     start_date: str = None,
     end_date: str = None,
     db: Session = Depends(get_db), 
-    admin = Depends(verify_admin)
+    admin = Depends(verify_role(["super_admin"]))
 ):
     query = db.query(ForecastResult)
     

@@ -8,27 +8,8 @@ class ModelMetadata(Base):
     __tablename__ = "model_metadata"
 
 
-    id = Column(
+    id = Column(Integer, primary_key=True, index=True)
 
-        Integer,
+    last_trained_at = Column(DateTime, default=datetime.utcnow)
 
-        primary_key=True,
-
-        index=True
-    )
-
-
-    last_trained_at = Column(
-
-        DateTime,
-
-        default=datetime.utcnow
-    )
-
-
-    last_sales_count = Column(
-
-        Integer,
-
-        default=0
-    )
+    last_sales_count = Column(Integer, default=0)

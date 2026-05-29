@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Float, Date
+from sqlalchemy import Column, Index, Integer, String, Float, Date
 from app.db.session import Base
 
 class Sales(Base):
@@ -6,15 +6,28 @@ class Sales(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    product_name = Column(String(255))
+    product_name = Column(String(255), index=True)
     
-    category = Column(String(255))
+    category = Column(String(255), index=True)
 
-    sales_date = Column(Date)
+    sales_date = Column(Date, index=True)
 
     quantity_sold = Column(Integer)
 
     revenue = Column(Float)
 
-    region = Column(String(10), nullable=True)
+    region = Column(String(10), nullable=True, index=True)
 
+    stock_available = Column(Integer,default=100)
+
+    __table_args__ = (
+
+    Index("idx_sales_date","sales_date"),
+
+    Index("idx_product_name","product_name"),
+
+    Index("idx_category","category"),
+
+    Index("idx_region","region"),
+    
+)

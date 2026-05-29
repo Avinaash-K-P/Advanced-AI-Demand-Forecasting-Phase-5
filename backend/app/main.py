@@ -8,30 +8,36 @@ from app.models.sales import Sales
 from app.models.forecast import ForecastResult
 from app.models.reports import Report
 from app.models.model_metadata import ModelMetadata
+from app.models.api_logs import APILog
+from app.models.forecast_history import ForecastHistory
 from app.routes import auth, admin, sales, forecast, analytics, reports
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.utils.apscheduler import scheduler
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="AI Demand Forecasting API", 
+    title="AI Demand Forecasting Phase 3", 
     description=""" 
     Advanced AI-powered Demand Forecasting and Analytics Platform.
 
     Features Included:
-    - JWT Authentication & Role Management
-    - Sales Dataset Management
-    - AI Forecast Generation using Prophet
-    - Analytics Dashboard APIs
-    - Forecast Accuracy Tracking
-    - Pagination, Search & Filtering
-    - Excel/PDF Report Export
-    - Analytics Summary Reports
-    - Admin & User Management
+    - New RBAC : Super Admin / Analyst / Viewer Roles
+    - Advanced Dynamic Dashboard
+    - Global Search method
+    - Search Result table
+    - Automated Retraining model
+    - AI Forecast Generation using Ensemble prediction
+    - Real Time Live monitoring sales product
+    - Forecast history Tracking and comparison
+    - Advanced Pagination and Filters
+    - Downloadable Analytics Summary Reports
+    - Optimized API Performance
     """, 
-    version="2.0.0"
+    version="3.0.0"
 )
 
 app.add_middleware(
@@ -48,6 +54,16 @@ app.include_router(sales.router)
 app.include_router(forecast.router)
 app.include_router(analytics.router)
 app.include_router(reports.router)
+
+# Caching Support
+@app.on_event("startup")
+async def startup():
+
+    FastAPICache.init(
+        InMemoryBackend(),
+        prefix="fastapi-cache"
+    )
+
 
 # To view the excel and pdf file
 app.mount(
@@ -82,8 +98,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
     return JSONResponse(
         status_code=422,
         content=error_response(
-            message="Validation failed",
-            errors=formatted_errors
+            message=f"Validation failed: {formatted_errors}"
         )
     )
 

@@ -5,8 +5,9 @@ from app.db.database import get_db
 from app.models.user import User
 from app.models.forecast import ForecastResult
 from app.models.reports import Report
-from app.core.security import verify_token
+from app.core.security import verify_role
 from app.utils.response import success_response
+from app.utils.logger import log_api_activity
 import pandas as pd
 from reportlab.platypus import (
     SimpleDocTemplate,
@@ -21,9 +22,8 @@ router = APIRouter(prefix="/reports", tags=["reports"])
 @router.get("/export-excel")
 def export_excel(
     db: Session = Depends(get_db),
-    user = Depends(verify_token)
-):
-    
+    user = Depends(verify_role(["super_admin","analyst","viewer"]))
+):  
     forecasts = db.query(
         ForecastResult
     ).all()
@@ -50,13 +50,26 @@ def export_excel(
     current_user = db.query(User).filter(User.email == user["sub"]).first() # Fetch username
 
     new_report = Report(
-    filename= filename,
-    file_path=file_path,
-    file_type="excel",
-    generated_by= current_user.username # Store Username
-)
+        filename= filename,
+        file_path=file_path,
+        file_type="excel",
+        generated_by= current_user.username # Store Username
+    )
     db.add(new_report)
     db.commit()
+
+    log_api_activity(
+
+        db=db,
+
+        username= user["username"],
+
+        endpoint="/export-excel",
+
+        method="GET",
+
+        status="SUCCESS"
+    )    
 
     return FileResponse(
         path= file_path,
@@ -71,9 +84,8 @@ def export_excel(
 @router.get("/export-pdf")
 def export_pdf(
     db: Session = Depends(get_db),
-    user = Depends(verify_token)
+    user = Depends(verify_role(["super_admin","analyst","viewer"]))
 ):
-
     forecasts = db.query(
         ForecastResult
     ).all()
@@ -140,6 +152,19 @@ def export_pdf(
     db.add(new_report)
 
     db.commit()
+
+    log_api_activity(
+
+        db=db,
+
+        username= user["username"],
+
+        endpoint="/export-pdf",
+
+        method="GET",
+
+        status="SUCCESS"
+    )    
 
     return FileResponse(
         path=file_path,

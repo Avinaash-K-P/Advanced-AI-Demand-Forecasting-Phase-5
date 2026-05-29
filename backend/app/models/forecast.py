@@ -1,4 +1,5 @@
-from sqlalchemy import Column, Integer, String, Float, Date
+from sqlalchemy import Column, Integer, Index, Float, Date, ForeignKey
+from sqlalchemy.orm import relationship
 from app.db.session import Base
 
 class ForecastResult(Base):
@@ -7,8 +8,19 @@ class ForecastResult(Base):
 
     id = Column(Integer, primary_key=True, index=True)
 
-    product_name = Column(String(255))
-
-    forecast_date = Column(Date)
+    forecast_date = Column(Date, index=True)
 
     predicted_demand = Column(Float)
+
+    sales_trend = Column(Float, default = 0)
+
+    weekly_pattern = Column(Float, default = 0)
+
+    yearly_pattern = Column(Float, default = 0)
+
+    __table_args__ = (
+
+    Index("idx_forecast_date", "forecast_date"),
+    
+    )
+    

@@ -77,14 +77,15 @@ def verify_token(
             detail="Invalid or expired token"
         )
     
-def verify_admin(user=Depends(verify_token)):
+def verify_role(allowed_roles: list):
+    def role_checker(user = Depends(verify_token)):
+        if user.get("role") not in allowed_roles:
 
-    if user.get("role") != "admin":
+            raise HTTPException(
+                status_code=403,
+                detail="Admin denied"
+            )
 
-        raise HTTPException(
-            status_code=403,
-            detail="Admin access required"
-        )
-
-    return user
+        return user
+    return role_checker
 

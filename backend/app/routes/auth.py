@@ -4,6 +4,7 @@ from app.db.database import get_db
 from app.models.user import User
 from app.schemas.auth import UserCreate, UserLogin
 from app.utils.response import success_response
+from app.utils.logger import log_api_activity
 from app.core.security import(
     hash_password, 
     verify_password, 
@@ -66,9 +67,23 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
 
     access_token = create_access_token(
         data={
+            "username": existing_user.username,
             "sub": existing_user.email,
-            "role": existing_user.role
+            "role": existing_user.role,
             }
+    )
+
+    log_api_activity(
+
+        db=db,
+
+        username= existing_user.username,
+
+        endpoint="/auth/login",
+
+        method="GET",
+
+        status="SUCCESS"
     )
 
     return success_response(

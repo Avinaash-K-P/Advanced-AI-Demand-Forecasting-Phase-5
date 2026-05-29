@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, UploadFile, File, HTTPException
 import pandas as pd
 from app.utils.response import success_response
+from app.utils.logger import log_api_activity
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.sales import Sales
-from app.core.security import verify_token
+from app.core.security import verify_role
 from app.services.sales_service import (
     validate_dataset, 
     clean_dataset
@@ -14,7 +15,11 @@ router = APIRouter(prefix="/sales", tags=["sales"])
 
 # Upload Sales Dataset
 @router.post("/upload-dataset")
-async def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get_db), user = Depends(verify_token)):
+async def upload_dataset(
+    file: UploadFile = File(...), 
+    db: Session = Depends(get_db), 
+    user = Depends(verify_role(["super_admin","analyst"]))
+):
 
     filename = file.filename.lower()
 
@@ -65,6 +70,19 @@ async def upload_dataset(file: UploadFile = File(...), db: Session = Depends(get
 
         db.add_all(sales_records)
         db.commit() 
+
+        log_api_activity(
+
+            db=db,
+
+            username= user["username"],
+
+            endpoint="/upload-dataset",
+
+            method="GET",
+
+            status="SUCCESS"
+        )    
 
         return success_response(
             message = "File uploaded successfully",
