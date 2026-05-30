@@ -24,9 +24,9 @@ Pandas,
 Scikit-learn,
 OpenPyXL,
 python-multipart,
-ReportLab
-Apscheduler
-alembic
+ReportLab,
+Apscheduler,
+alembic,
 fastapi-cache2
 
 Frontend packages:
