@@ -1,7 +1,6 @@
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, DateTime, Integer, String
 from sqlalchemy.orm import relationship  
 from app.db.session import Base
-import enum
 
 class User(Base):
     __tablename__ = "users"
@@ -15,6 +14,12 @@ class User(Base):
     password = Column(String(255), nullable=False)   
     
     role = Column(String(20), default = "viewer")  
+
+    status = Column(String(20),default="active")
+
+    reset_token = Column(String(255),nullable=True)
+
+    reset_token_expiry = Column(DateTime,nullable=True)
 
     logs = relationship("APILog",back_populates="user")
 

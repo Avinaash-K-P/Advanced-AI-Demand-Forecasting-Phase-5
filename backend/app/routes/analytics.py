@@ -9,6 +9,7 @@ from app.models.user import User
 from app.models.sales import Sales
 from app.models.forecast import ForecastResult
 from app.models.forecast_history import ForecastHistory
+from app.models.alerts import Alert
 from app.models.api_logs import APILog
 from sklearn.metrics import mean_absolute_error
 from app.core.security import verify_role
@@ -16,6 +17,7 @@ import statistics
 import time
 from sqlalchemy import or_
 from fastapi_cache.decorator import cache
+from app.models.inventory import Inventory
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -811,4 +813,250 @@ def get_top_products(
     return success_response(
         message = "Top selling products retrieved successfully!",
         data = data
+    )
+
+#Alert display
+@router.get("/get-alert")
+def get_alerts(
+    db:Session = Depends(get_db)
+):
+
+    alerts = db.query(Alert).order_by(Alert.created_at.desc()).all()
+
+    return success_response(
+        message="Alert generated",
+        data=alerts
+    )
+
+# Customer behaviour
+@router.get("/customer-behavior")
+def customer_behavior_analysis(
+
+    db: Session = Depends(get_db),
+
+    user = Depends(
+        verify_role([
+            "super_admin",
+            "analyst",
+            "viewer"
+        ])
+    )
+):
+    total_customers = db.query(
+
+        func.count(
+            func.distinct(
+                Sales.customer_id
+            )
+        )
+
+    ).scalar()   
+
+    repeat_customers = db.query(
+
+        Sales.customer_id
+
+    ).group_by(
+
+        Sales.customer_id
+
+    ).having(
+
+        func.count(
+            Sales.transaction_id
+        ) > 1
+
+    ).count()
+
+    top_segment = db.query(
+
+        Sales.customer_segment,
+
+        func.count(
+            Sales.customer_segment
+        )
+
+    ).group_by(
+
+        Sales.customer_segment
+
+    ).order_by(
+
+        func.count(
+            Sales.customer_segment
+        ).desc()
+
+    ).first()
+
+    top_gender = db.query(
+
+        Sales.customer_gender,
+
+        func.count(
+            Sales.customer_gender
+        )
+
+    ).group_by(
+
+        Sales.customer_gender
+
+    ).order_by(
+
+        func.count(
+            Sales.customer_gender
+        ).desc()
+
+    ).first()
+
+    top_age_group = db.query(
+
+        Sales.customer_age,
+
+        func.count(
+            Sales.customer_age
+        )
+
+    ).group_by(
+
+        Sales.customer_age
+
+    ).order_by(
+
+        func.count(
+            Sales.customer_age
+        ).desc()
+
+    ).first()
+
+    return success_response(
+
+        message="Customer behavior analysis completed",
+
+        data={
+
+            "total_customers":
+            total_customers,
+
+            "repeat_customers":
+            repeat_customers,
+
+            "top_segment":
+            top_segment[0]
+            if top_segment
+            else None,
+
+            "top_gender":
+            top_gender[0]
+            if top_gender
+            else None,
+
+            "top_age_group":
+            top_age_group[0]
+            if top_age_group
+            else None
+        }
+    )
+
+@router.get(
+    "/business-recommendations"
+)
+def get_business_recommendations(
+    db: Session = Depends(get_db),
+        user = Depends(
+        verify_role([
+            "super_admin",
+            "analyst",
+            "viewer"
+        ])
+    )
+):
+    forecasts = (
+
+    db.query(
+        ForecastResult
+    )
+
+    .order_by(
+        ForecastResult.forecast_date
+    )
+
+    .all()
+)
+    if not forecasts:
+
+        return success_response(
+
+        message="No forecast data found",
+
+        data=[]
+    )
+    avg_demand = sum(row.predicted_demand for row in forecasts) / len(forecasts)
+
+    avg_confidence = sum(row.confidence_score for row in forecasts) / len(forecasts)
+
+    latest_trend = forecasts[-1].sales_trend
+    
+    recommendations = []
+    
+    if avg_demand > 25:
+
+        recommendations.append({
+
+        "type":
+        "Inventory",
+
+        "priority":
+        "High",
+
+        "message":
+        "Increase inventory levels due to strong demand forecasts."
+    })
+        
+    if latest_trend > 0:
+
+        recommendations.append({
+
+        "type":
+        "Sales",
+
+        "priority":
+        "Medium",
+
+        "message":
+        "Demand trend is increasing. Prepare for higher order volume."
+    })
+
+    if avg_confidence < 75:
+
+        recommendations.append({
+
+        "type":
+        "Forecast",
+
+        "priority":
+        "High",
+
+        "message":
+        "Forecast confidence is low. Review forecasting inputs."
+    })    
+        
+    if avg_confidence >= 90:
+
+        recommendations.append({
+
+        "type":
+        "Forecast",
+
+        "priority":
+        "Low",
+
+        "message":
+        "Forecast confidence is high. Current planning assumptions look reliable."
+    })
+
+    return success_response(
+
+    message="Recommendations generated",
+
+    data=recommendations
     )

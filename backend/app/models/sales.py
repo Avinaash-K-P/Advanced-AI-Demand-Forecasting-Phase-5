@@ -20,6 +20,16 @@ class Sales(Base):
 
     stock_available = Column(Integer,default=100)
 
+    customer_id = Column(String(100))
+    
+    transaction_id = Column(String(100))
+    
+    customer_age = Column(String(50))
+    
+    customer_gender = Column(String(50))
+    
+    customer_segment = Column(String(100))
+
     __table_args__ = (
 
     Index("idx_sales_date","sales_date"),

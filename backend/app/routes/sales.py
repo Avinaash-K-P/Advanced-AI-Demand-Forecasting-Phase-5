@@ -5,6 +5,7 @@ from app.utils.logger import log_api_activity
 from sqlalchemy.orm import Session
 from app.db.database import get_db
 from app.models.sales import Sales
+from app.services.forecast_service import auto_generate_forecast
 from app.core.security import verify_role
 from app.services.sales_service import (
     validate_dataset, 
@@ -64,12 +65,20 @@ async def upload_dataset(
                 sales_date=row["sales_date"],
                 quantity_sold=int(row["quantity_sold"]),
                 revenue=float(row["revenue"]),
-                region = row["region"]
+                region = row["region"],
+                customer_id = row["customer_id"],
+                transaction_id = row["transaction_id"],
+                customer_age = row["customer_age"],
+                customer_gender = row["customer_gender"],
+                customer_segment = row["customer_segment"] 
                 )
             sales_records.append(sales)
 
         db.add_all(sales_records)
         db.commit() 
+
+        print("Forecast will be generated in few seconds....")
+        auto_generate_forecast()  # Automatically generate the forecast results
 
         log_api_activity(
 
@@ -93,10 +102,10 @@ async def upload_dataset(
             }
         )
 
-
     except Exception as e:
 
         raise HTTPException(
             status_code=500,
             detail=str(e)
         )
+    

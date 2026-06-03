@@ -8,6 +8,7 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from app.models.user import User
 from sqlalchemy.orm import Session
 from app.db.database import get_db
+from app.db.session import SessionLocal
 
 load_dotenv()
 
@@ -61,7 +62,7 @@ def verify_token(
             algorithms=[ALGORITHM]
         )
 
-        email = payload.get("sub")
+        email = payload.get("email")
 
         if email is None:
             raise HTTPException(
@@ -76,6 +77,30 @@ def verify_token(
             status_code=401,
             detail="Invalid or expired token"
         )
+    
+def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security), db: Session = Depends(get_db)):
+    token = credentials.credentials
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        print("TOKEN PAYLOAD:", payload)   
+        email = payload.get("email")
+
+        if email is None:
+            raise HTTPException(
+            status_code=401,
+            detail="Invalid token"
+    )
+
+        user = db.query(User).filter(User.email == email).first()
+
+        if not user:
+            raise HTTPException(status_code=401, detail="User not found")
+        return user
+        
+    except JWTError:
+        raise HTTPException(status_code=401, detail="Invalid or expired token")
+
     
 def verify_role(allowed_roles: list):
     def role_checker(user = Depends(verify_token)):

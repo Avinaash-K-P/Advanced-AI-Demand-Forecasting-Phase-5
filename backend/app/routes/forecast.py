@@ -1,18 +1,29 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 import pandas as pd
 from app.db.database import get_db
 from app.models.sales import Sales
 from app.models.forecast import ForecastResult
 from app.models.forecast_history import ForecastHistory
+from app.models.forecast_scheduler import ForecastSchedule
+from app.models.forecast_accuracy import ForecastAccuracy
+from app.schemas.forecast import ForecastScheduleUpdate
 from app.core.security import verify_role
-from app.utils.response import success_response
+from app.utils.response import error_response, success_response
 from app.utils.logger import log_api_activity
 from app.services.forecast_service import ( 
     preprocess_sales_data,
-    train_forecast_model
+    train_forecast_model,
+    evaluate_forecast_accuracy
 )    
+from datetime import datetime
 from fastapi_cache.decorator import cache
+from app.utils.apscheduler import (
+    scheduler,
+    load_forecast_schedule
+)
+
+
 
 router = APIRouter(prefix="/forecast", tags=["forecast"])
 
@@ -43,6 +54,102 @@ def preprocess_data(
     return success_response(
         message = "Data preprocessed successfully!",
         data = data
+    )
+
+#Forecast Scheduler
+@router.put("/forecast-schedule")
+def update_forecast_schedule(
+
+    schedule_data: ForecastScheduleUpdate,
+
+    db: Session = Depends(get_db),
+
+    user = Depends(
+        verify_role(["super_admin"])
+    )
+):
+
+    schedule = db.query(
+        ForecastSchedule
+    ).first()
+
+    valid_types = ["minutes","hours","days","weeks"]
+
+    if not schedule:
+
+        schedule = ForecastSchedule(
+
+            interval_type=schedule_data.interval_type,
+
+            interval_value=schedule_data.interval_value,
+
+            is_active=True,
+
+            updated_at=datetime.utcnow()
+        )
+
+        db.add(schedule)
+
+    else:
+
+        schedule.interval_type = (
+            schedule_data.interval_type
+        )
+
+        schedule.interval_value = (
+            schedule_data.interval_value
+        )
+
+        schedule.updated_at = (
+            datetime.utcnow()
+        )
+
+    db.commit()
+    
+    job = scheduler.get_job("forecast_job")
+
+    if job:
+        scheduler.remove_job("forecast_job")
+
+    load_forecast_schedule()
+
+    if schedule_data.interval_type not in valid_types:
+
+        raise HTTPException(status_code=400,detail="Invalid interval type")
+
+    return success_response(
+
+        message="Forecast schedule updated successfully!",
+
+        data={
+
+            "interval_type":
+            schedule.interval_type,
+
+            "interval_value":
+            schedule.interval_value
+        }
+    )
+@router.get("/get-forecast-schedule")
+def get_schedule(
+
+    db: Session = Depends(get_db),
+
+    user = Depends(
+        verify_role(["super_admin"])
+    )
+
+):
+
+    schedule = db.query(
+        ForecastSchedule
+    ).first()
+
+    return success_response(
+
+        message="Schedule fetched",
+
+        data=schedule
     )
 
 #Generate Forecast
@@ -78,22 +185,32 @@ def generate_forecast(
         # Adding to forecast results     
         forecast = ForecastResult(
 
-            forecast_date=row["ds"],
+            forecast_date = row["ds"],
 
-            predicted_demand=float(row["predicted_demand"])
+            predicted_demand = float(row["predicted_demand"]),
+
+            prophet_prediction = float(row["prophet_prediction"]),
+
+            lr_prediction = float(row["linear_regression_prediction"]),
+
+            ma_prediction = float(row["moving_average_prediction"]),
+            
+            sales_trend = float(row["sales_trend"]),
+
+            weekly_pattern = float(row["weekly_pattern"]),
+
+            yearly_pattern = float(row["yearly_pattern"])
+
         )
-        forecast_records.append(forecast)
 
+        forecast_records.append(forecast)
 
         # Adding to forecast history 
         history = ForecastHistory(
 
         forecast_date=str(row["ds"]),
 
-        predicted_demand=float(
-
-            row["predicted_demand"]
-        ),
+        predicted_demand=float(row["predicted_demand"]),
 
         model_type="Ensemble Prophet",
 
@@ -104,9 +221,14 @@ def generate_forecast(
     db.add(history)    
     db.commit()
 
+    # Eavluating data
+    evaluate_forecast_accuracy(db)
+
     log_api_activity(
 
         db=db,
+
+        user_id = user["id"],
 
         username= user["username"],
 
@@ -210,3 +332,202 @@ def forecast_comparison(
 
         data=data
     )
+
+# Model Comparison
+@router.get("/model-comparison")
+def model_comparison(
+
+    db: Session = Depends(get_db),
+
+    user = Depends(
+        verify_role([
+            "super_admin",
+            "analyst",
+            "viewer"
+        ])
+    )
+):
+    forecasts = (
+
+        db.query(ForecastResult)
+
+        .order_by(
+            ForecastResult.forecast_date
+        )
+
+        .limit(30)
+
+        .all()
+    )
+    if not forecasts:
+
+        return success_response(
+
+            message="No forecast data found",
+
+            data=[]
+        )
+    comparison = []
+    for row in forecasts:
+
+        comparison.append({
+
+            "date":
+            str(row.forecast_date),
+
+            "prophet":
+            round(
+                row.prophet_prediction or 0,
+                2
+            ),
+
+            "linear_regression":
+            round(
+                row.lr_prediction or 0,
+                2
+            ),
+
+            "moving_average":
+            round(
+                row.ma_prediction or 0,
+                2
+            ),
+
+            "ensemble":
+            round(
+                row.predicted_demand or 0,
+                2
+            )
+        })
+    return success_response(
+
+        message="Model comparison generated",
+
+        data=comparison
+    )        
+
+#Model Accuracy
+@router.get("/model-accuracy")
+def model_accuracy(
+
+    db: Session = Depends(get_db),
+
+    user = Depends(
+        verify_role([
+            "super_admin",
+            "analyst",
+            "viewer"
+        ])
+    )
+):
+    accuracy_rows = (
+
+    db.query(ForecastAccuracy)
+
+    .order_by(
+        ForecastAccuracy.evaluation_date
+    )
+
+    .limit(30)
+
+    .all()
+)
+    if not accuracy_rows:
+
+        return error_response(
+
+            message="No accuracy data found",
+
+            details=[]
+    )
+    accuracy_data = []
+    for row in accuracy_rows:
+
+        accuracy_data.append({
+
+        "date":
+        str(row.evaluation_date),
+
+        "accuracy":
+        round(
+            row.accuracy_percentage,
+            2
+        )
+        })
+        
+    current_accuracy = round(accuracy_rows[-1].accuracy_percentage,2)
+    average_accuracy = round(
+
+    sum(row.accuracy_percentage for row in accuracy_rows) /len(accuracy_rows),2)
+    
+    return success_response(
+
+    message="Accuracy trends generated",
+
+    data={
+
+        "current_accuracy":
+        current_accuracy,
+
+        "average_accuracy":
+        average_accuracy,
+
+        "trend":
+        accuracy_data
+    }
+)
+
+@router.get("/forecast-confidence")
+def get_forecast_confidence(
+    db: Session = Depends(get_db),
+    user = Depends(verify_role([
+            "super_admin",
+            "analyst",
+            "viewer"
+        ])
+    )
+):
+    forecasts = (
+
+    db.query(ForecastResult)
+
+    .order_by(
+        ForecastResult.forecast_date
+    ).all()
+)
+    if not forecasts:
+
+        return success_response(
+
+        message="No forecast data found",
+
+        data={}
+    )
+    avg_confidence = round(
+    sum(row.confidence_score for row in forecasts)/len(forecasts),2)
+    trend = []     
+    for row in forecasts:
+
+        trend.append({
+
+        "date":
+        str(row.forecast_date),
+
+        "confidence":
+        row.confidence_score
+    })
+    
+    return success_response(
+
+    message="Confidence score generated",
+
+    data={
+
+        "average_confidence":
+        avg_confidence,
+
+        "trend":
+        trend
+    }
+)
+

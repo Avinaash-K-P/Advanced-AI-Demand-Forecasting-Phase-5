@@ -3,6 +3,14 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse 
 from app.utils.response import error_response
 from app.db.session import engine, Base 
+from app.routes import auth, admin, sales, forecast, analytics, reports, inventory_integration, alert_settings
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from app.utils.apscheduler import scheduler
+from fastapi_cache import FastAPICache
+from fastapi_cache.backends.inmemory import InMemoryBackend
+
+# Models Import
 from app.models.user import User
 from app.models.sales import Sales
 from app.models.forecast import ForecastResult
@@ -10,34 +18,39 @@ from app.models.reports import Report
 from app.models.model_metadata import ModelMetadata
 from app.models.api_logs import APILog
 from app.models.forecast_history import ForecastHistory
-from app.routes import auth, admin, sales, forecast, analytics, reports
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from app.utils.apscheduler import scheduler
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.inmemory import InMemoryBackend
+from app.models.forecast_scheduler import ForecastSchedule
+from app.models.alerts import Alert
+from app.models.Inventory_Integration import InventoryIntegration
+from app.models.inventory import Inventory
+from app.models.forecast_accuracy import ForecastAccuracy
+from app.models.alert_settings import AlertSettings
 
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="AI Demand Forecasting Phase 3", 
+    title="AI Demand Forecasting Phase 4", 
     description=""" 
     Advanced AI-powered Demand Forecasting and Analytics Platform.
 
     Features Included:
-    - New RBAC : Super Admin / Analyst / Viewer Roles
-    - Advanced Dynamic Dashboard
-    - Global Search method
-    - Search Result table
-    - Automated Retraining model
-    - AI Forecast Generation using Ensemble prediction
-    - Real Time Live monitoring sales product
-    - Forecast history Tracking and comparison
-    - Advanced Pagination and Filters
-    - Downloadable Analytics Summary Reports
+    - User Profile Edit
+    - Password Reset features
+    - Account Status Managment
+    - User Activity Tracking
+    - Multi Model Forecast Comparison
+    - Model Accuracy
+    - Customer Behaviour Analysis
+    - Inventory Integration
+    - Third Party Integration
+    - Webhook Support
+    - Configurable Alert Settings
+    - Email Notification Features
+    - Scheduled Background Forecast Jobs
+    - Enterprise Logging & audit Tracking
+    - Historical Forecast Tracking
     - Optimized API Performance
     """, 
-    version="3.0.0"
+    version="4.0.0"
 )
 
 app.add_middleware(
@@ -54,6 +67,8 @@ app.include_router(sales.router)
 app.include_router(forecast.router)
 app.include_router(analytics.router)
 app.include_router(reports.router)
+app.include_router(inventory_integration.router)
+app.include_router(alert_settings.router)
 
 # Caching Support
 @app.on_event("startup")

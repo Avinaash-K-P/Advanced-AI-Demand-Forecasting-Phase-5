@@ -1,6 +1,7 @@
-from sqlalchemy import Column, Integer, Index, Float, Date, ForeignKey
+from sqlalchemy import Column, Integer, Index, Float, Date, DateTime
 from sqlalchemy.orm import relationship
 from app.db.session import Base
+from datetime import datetime
 
 class ForecastResult(Base):
 
@@ -12,11 +13,19 @@ class ForecastResult(Base):
 
     predicted_demand = Column(Float)
 
+    prophet_prediction = Column(Float)
+
+    lr_prediction = Column(Float)
+
+    ma_prediction = Column(Float)
+
     sales_trend = Column(Float, default = 0)
 
     weekly_pattern = Column(Float, default = 0)
 
     yearly_pattern = Column(Float, default = 0)
+
+    confidence_score = Column(Float,default=0)
 
     __table_args__ = (
 

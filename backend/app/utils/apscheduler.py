@@ -1,19 +1,51 @@
 from apscheduler.schedulers.background import BackgroundScheduler
-
 from app.services.forecast_service import auto_generate_forecast
-
+from app.models.forecast_scheduler import ForecastSchedule
+from app.db.session import SessionLocal
 
 scheduler = BackgroundScheduler()
 
+def load_forecast_schedule():
 
-scheduler.add_job(
+    db = SessionLocal()
 
-    auto_generate_forecast,
+    try:
 
-    "interval",
+        schedule = db.query(ForecastSchedule).first()
 
-    minutes=10
-    #seconds = 120 
-)
+        if not schedule:
 
-scheduler.start()
+            scheduler.add_job(
+
+                auto_generate_forecast,
+
+                "interval",
+
+                minutes=10,
+
+                id="forecast_job",
+
+                replace_existing=True
+            )
+
+            return
+
+        scheduler.add_job(
+
+            auto_generate_forecast,
+
+            "interval",
+
+            **{
+                schedule.interval_type:
+                schedule.interval_value
+            },
+
+            id="forecast_job",
+
+            replace_existing=True
+        )
+
+    finally:
+
+        db.close()

@@ -1,13 +1,21 @@
 import pandas as pd
-
+from app.db.session import SessionLocal
+from app.models.sales import Sales
+from app.services.forecast_service import auto_generate_forecast
 REQUIRED_COLUMNS = [
     "product_name",
     "category",
     "sales_date",
     "quantity_sold",
     "revenue",
-    "region"
+    "region",
+    "customer_id",
+    "transaction_id",
+    "customer_age",
+    "customer_gender",
+    "customer_segment"    
 ]
+
 
 def validate_dataset(df: pd.DataFrame):
 
@@ -65,7 +73,12 @@ def clean_dataset(df: pd.DataFrame):
             "sales_date",
             "quantity_sold",
             "revenue",
-            "region"
+            "region",
+            "customer_id",
+            "transaction_id",
+            "customer_age",
+            "customer_gender",
+            "customer_segment" 
         ]
     )
 

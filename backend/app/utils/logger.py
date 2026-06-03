@@ -5,6 +5,8 @@ def log_api_activity(
 
     db,
 
+    user_id,
+
     username,
 
     endpoint,
@@ -17,6 +19,8 @@ def log_api_activity(
     log = APILog(
 
         username=username,
+
+        user_id=user_id,
 
         endpoint=endpoint,
 

@@ -1,17 +1,18 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.db.database import get_db
 from app.utils.response import success_response
 from app.utils.pagination import paginator
-from app.core.security import verify_role
+from app.core.security import get_current_user, verify_role
 from app.models.forecast import ForecastResult
 from app.models.user import User
 from app.models.sales import Sales
 from app.models.reports import Report
 import os
 from datetime import datetime
-
+from app.schemas.auth import UserStatusUpdate
+from app.models.api_logs import APILog
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -60,6 +61,102 @@ def list_users(
         message="List of all users",
         data= data
     )
+
+# User Management
+@router.put("/users/{user_id}/status")
+def update_user_status(
+
+    user_id: int,
+
+    payload: UserStatusUpdate,
+
+    db: Session = Depends(get_db),
+
+    admin = Depends(verify_role(["super_admin"]))
+
+):
+
+    user = db.query(User).filter(
+        User.id == user_id
+    ).first()
+
+    if not user:
+
+        raise HTTPException(
+
+            status_code=404,
+
+            detail="User not found"
+
+        )
+
+    user.status = payload.status
+
+    db.commit()
+
+    return {
+
+        "message":
+        "Status updated successfully"
+    }
+
+# Activity Logs
+@router.get("/activity-logs")
+def get_activity_logs(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    if current_user.role != "super_admin":
+
+        raise HTTPException(
+
+        status_code=403,
+
+        detail="Access denied"
+    )
+    logs = (
+
+    db.query(APILog)
+
+    .order_by(
+        APILog.timestamp.desc()
+    )
+
+    .all()
+)
+    
+    return success_response(
+
+        message="Activity logs fetched",
+
+        data=[
+
+        {
+
+            "user_id":
+            log.user_id,
+
+            "username":
+            log.username,
+
+            "endpoint":
+            log.endpoint,
+
+            "method":
+            log.method,
+
+            "status":
+            log.status,
+
+            "timestamp":
+            log.timestamp
+
+        }
+
+        for log in logs
+
+    ]
+)
 
 # List All Sales 
 @router.get("/sales")
