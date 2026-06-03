@@ -160,7 +160,10 @@ justify-center p-12">
           >
             Register
           </Link>
+        </p>
 
+        <p className="mt-6 text-center text-gray-600">
+          <Link to="/forgot-password">Forgot Password?</Link>
         </p>
 
       </div>

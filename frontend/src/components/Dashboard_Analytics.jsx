@@ -14,13 +14,29 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-
+import { toast } from "react-toastify";
 
 function DashboardAnalytics({darkMode}) {
   //To get user role
   const role = localStorage.getItem("role")  
-  
+
+  //To show alert messages
+  const [alerts, setAlerts] = useState([]); 
+    
+  //To schedule interval
+  const [intervalType, setIntervalType] = useState("minutes");
+  const [intervalValue, setIntervalValue] = useState(10);
+
   //To fetch api
+  const [businessRecommendations,setBusinessRecommendations] = useState([]);
+  const [confidenceData,setConfidenceData] = useState(null);
+  const [accuracyData,setAccuracyData] = useState(null);
+  const [modelComparison, setModelComparison] = useState([]);
+  const [customerBehavior,setCustomerBehavior] =useState(null);
+  const [inventoryOptimization,setInventoryOptimization] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
+  const [demandSpikes, setDemandSpikes] = useState([]);
+  const [stockRisk, setStockRisk] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);  
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState(null);    
@@ -38,31 +54,380 @@ function DashboardAnalytics({darkMode}) {
   const [monthlySales, setMonthlySales] = useState([]);
   const [topProducts, setTopProducts] = useState([]);
   const [forecastResults, setForecastResults] = useState([]);
-  const [filters, setFilters] = useState({
+  
+  const [filters, setFilters] = useState(
 
-    startDate: "",
+    {startDate: "", endDate: "", category: "",region: ""}
 
-    endDate: "",
+)
+  const clearFilters = () => {
 
-    category: "",
+    setFilters({startDate: "", endDate: "", category: "", region: ""})
 
-    region: ""
-})
-
-const clearFilters = () => {
-
-    setFilters({
-
-        startDate: "",
-
-        endDate: "",
-
-        category: "",
-
-        region: ""
-    })
 }
+    //Business Recommendation
+    const fetchBusinessRecommendations = async () => {
 
+    const response =
+    await axios.get(
+
+        "http://127.0.0.1:8000/analytics/business-recommendations",
+                    {
+                headers:{
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+    );    
+    setBusinessRecommendations(
+        response.data.data
+    );
+};
+
+   //Confidence Score
+   const fetchConfidenceData =
+    async () => {
+
+    try {
+
+        const response =
+        await axios.get(
+
+            "http://127.0.0.1:8000/forecast/forecast-confidence",
+
+            {
+                headers:{
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setConfidenceData(
+            response.data.data
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+}; 
+
+    //Model Accuracy
+    const fetchAccuracyData = async () => {
+
+    try {
+
+        const response =
+        await axios.get(
+
+            "http://127.0.0.1:8000/forecast/model-accuracy",
+
+            {
+                headers: {
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setAccuracyData(
+            response.data.data
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+};
+
+    //Model Comparison
+    const fetchModelComparison = async () => {
+
+    try {
+
+        const response = await axios.get(
+
+            "http://127.0.0.1:8000/forecast/model-comparison",
+
+            {
+                headers: {
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setModelComparison(
+            response.data.data
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+};    
+
+
+    //Customer Behavior
+    const fetchCustomerBehavior =
+async () => {
+
+    try {
+
+        const response =
+        await axios.get(
+
+            "http://127.0.0.1:8000/analytics/customer-behavior",
+
+            {
+                headers: {
+
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setCustomerBehavior(
+
+            response.data.data
+
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+};
+
+    //Inventory Optimization
+    const fetchInventoryOptimization = async () => {
+
+    try {
+
+        const response =
+        await axios.get(
+
+            "http://127.0.0.1:8000/inventory/inventory-optimization",
+
+            {
+                headers: {
+
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setInventoryOptimization(
+
+            response.data.data
+
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+};
+
+    //Demand Recommendation
+    const fetchDemandRecommendations = async () => {
+
+    try {
+
+        const response = await axios.get(
+
+            "http://127.0.0.1:8000/inventory/demand",
+
+            {
+                headers: {
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setRecommendations(
+            response.data.data
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+};
+
+   // Demand Spike Prediction
+   const fetchDemandSpikes = async () => {
+
+    try {
+
+        const response = await axios.get(
+
+            "http://127.0.0.1:8000/inventory/demand-spikes",
+
+            {
+                headers: {
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setDemandSpikes(
+            response.data.data
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+};
+
+   // Low Stock Prediction
+   const fetchStockRisk = async () => {
+
+    try {
+
+        const response = await axios.get(
+
+            "http://127.0.0.1:8000/inventory/global-stock-risk",
+
+            {
+                headers: {
+
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setStockRisk(
+            response.data.data
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+};
+
+   // Schedule Time
+   const updateSchedule = async () => {
+
+    try {
+
+        await axios.put(
+
+            "http://127.0.0.1:8000/forecast/forecast-schedule",
+
+            {
+
+                interval_type:
+                intervalType,
+
+                interval_value:
+                parseInt(intervalValue)
+
+            },
+
+            {
+
+                headers: {
+
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        toast.success("Forecast Schedule Updated Successfully!");
+
+    }
+
+    catch(error){
+
+        console.error(error);
+
+        toast.error("Failed to update schedule");
+    }
+};
+
+   // Load scheduler
+   const loadSchedule = async () => {
+
+    try {
+
+        const response =
+            await axios.get(
+
+            "http://127.0.0.1:8000/forecast/get-forecast-schedule",
+
+            {
+
+                headers: {
+
+                    Authorization:
+                    `Bearer ${localStorage.getItem("token")}`
+                }
+            }
+        );
+
+        setIntervalType(
+            response.data.data.interval_type
+        );
+
+        setIntervalValue(
+            response.data.data.interval_value
+        );
+
+    }
+
+    catch(error){
+
+        console.error(error);
+    }
+}; 
+
+   // Alert Message
+   const fetchAlerts = async () => {
+
+    const response = await axios.get(
+
+        "http://127.0.0.1:8000/analytics/get-alert",
+
+        {
+
+            headers: {
+
+                Authorization:
+                `Bearer ${localStorage.getItem("token")}`
+            }
+        }
+    );
+
+    setAlerts(
+        response.data.data
+    );
+}; 
 
    // Global search
    const handleGlobalSearch = async () => {
@@ -515,33 +880,46 @@ const clearFilters = () => {
     fetchSystemPerformance();
     fetchForecastComparison();
     handleGlobalSearch();
+    fetchAlerts();
+    updateSchedule();
+    loadSchedule();
+    fetchStockRisk();
+    fetchDemandSpikes();
+    fetchDemandRecommendations();
+    fetchInventoryOptimization();
+    fetchCustomerBehavior();
+    fetchModelComparison();
+    fetchAccuracyData();
+    fetchConfidenceData();
+    fetchBusinessRecommendations();
 
-           // Auto Refresh Every 30 Seconds
+    // Auto Refresh Every 30 Seconds
     const interval = setInterval(() => {
 
       fetchForecastAccuracy();
-
       fetchForecastResults();
-
       fetchRecentSales();
-
       fetchSeasonalTrends();
-
       fetchAnomalies();
-
       fetchRegionForecast();
-
       fetchCategorySales();
-
       fetchRevenuePrediction();
-
       fetchInventoryRisk();
-
       fetchSystemPerformance();
-
       fetchForecastComparison();
-
       handleGlobalSearch();
+      fetchAlerts();
+      updateSchedule();
+      loadSchedule();
+      fetchStockRisk();
+      fetchDemandSpikes();
+      fetchDemandRecommendations();
+      fetchInventoryOptimization();
+      fetchCustomerBehavior();
+      fetchModelComparison();
+      fetchAccuracyData();
+      fetchConfidenceData();
+      fetchBusinessRecommendations();
 
       console.log("Live dashboard refreshed");
 
@@ -555,174 +933,8 @@ const clearFilters = () => {
 
 return (
 
-<div
-    classname="
-    grid
-    grid-cols-1
-    md:grid-cols-2
-    xl:grid-cols-3
-    gap-6">
+<div>
 
-    {/*Global Search*/}
-    <div className="
-    flex
-    gap-4
-    mb-6
-    ">
-
-    <input
-
-        type="text"
-
-        placeholder="Global Search..."
-
-        value={searchQuery}
-
-        onChange={(e)=>
-            setSearchQuery(
-                e.target.value
-            )
-        }
-
-        className="
-            flex-1
-            p-4
-            border
-            rounded-2xl
-        "
-    />
-
-
-    <button
-
-        onClick={handleGlobalSearch}
-
-        className="
-            bg-blue-600
-            text-white
-            px-6
-            rounded-2xl
-        "
-    >
-
-        Search
-
-    </button>
-
-</div>
-
-{/*Display search result*/}
-
-{ hasSearched && searchResults && (
-
-    <div className="
-        bg-white
-        rounded-2xl
-        shadow-lg
-        p-6
-        mt-6
-    ">
-
-        <h2 className="
-            text-2xl
-            font-bold
-            mb-4
-        ">
-
-            Search Results
-
-        </h2>
-
-
-{
-    searchResults.sales?.length > 0 ? (
-
-           <table className="
-            min-w-full
-         ">
-
-            <thead className="
-                bg-gray-100
-            ">
-
-                <tr>
-
-                    <th className="p-4 text-left">
-                        Product
-                    </th>
-
-                    <th className="p-4 text-left">
-                        Category
-                    </th>
-
-                    <th className="p-4 text-left">
-                        Region
-                    </th>
-
-                </tr>
-
-            </thead>
-
-
-            <tbody>
-
-                {
-
-                    searchResults.sales.slice(0,10).map(
-
-                        (item,index)=>(
-
-                        <tr
-                            key={index}
-                            className="
-                                border-b
-                            "
-                        >
-
-                            <td className="p-4">
-
-                                {item.product}
-
-                            </td>
-
-                            <td className="p-4">
-
-                                {item.category}
-
-                            </td>
-
-                            <td className="p-4">
-
-                                {item.region}
-
-                            </td>
-
-                        </tr>
-                    ))
-                }
-
-            </tbody>
-
-        </table>
-    
-        ) : 
-        
-(
-        <div className="
-            text-center
-            text-gray-500
-            p-10
-        ">
-
-            No Results Found
-
-        </div>
-    )
-}
-
-    </div>
-)}
-<br/>
 { (role =="super_admin" || role == "analyst") &&
 
 (<>
@@ -888,7 +1100,7 @@ return (
 
             {
                 systemPerformance.api_response_time_seconds
-            }s
+            }
 
         </p>
 
@@ -899,6 +1111,284 @@ return (
 </>)
 
 }
+
+<br/>
+    {/*Global Search*/}
+    <div className="
+    flex
+    gap-4
+    mb-6
+    ">
+
+    <input
+
+        type="text"
+
+        placeholder="Global Search..."
+
+        value={searchQuery}
+
+        onChange={(e)=>
+            setSearchQuery(
+                e.target.value
+            )
+        }
+
+        className="
+            flex-1
+            p-4
+            border
+            rounded-2xl
+        "
+    />
+
+
+    <button
+
+        onClick={handleGlobalSearch}
+
+        className="
+            bg-blue-600
+            text-white
+            px-6
+            rounded-2xl
+        "
+    >
+
+        Search
+
+    </button>
+
+</div>
+
+{/*Display search result*/}
+
+{ hasSearched && searchResults && (
+
+    <div className="
+        bg-white
+        rounded-2xl
+        shadow-lg
+        p-6
+        mt-6
+    ">
+
+        <h2 className="
+            text-2xl
+            font-bold
+            mb-4
+        ">
+
+            Search Results
+
+        </h2>
+
+
+{
+    searchResults.sales?.length > 0 ? (
+
+           <table className="
+            min-w-full
+         ">
+
+            <thead className="
+                bg-gray-100
+            ">
+
+                <tr>
+
+                    <th className="p-4 text-left">
+                        Product
+                    </th>
+
+                    <th className="p-4 text-left">
+                        Category
+                    </th>
+
+                    <th className="p-4 text-left">
+                        Region
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {
+
+                    searchResults.sales.slice(0,5).map(
+
+                        (item,index)=>(
+
+                        <tr
+                            key={index}
+                            className="
+                                border-b
+                            "
+                        >
+
+                            <td className="p-4">
+
+                                {item.product}
+
+                            </td>
+
+                            <td className="p-4">
+
+                                {item.category}
+
+                            </td>
+
+                            <td className="p-4">
+
+                                {item.region}
+
+                            </td>
+
+                        </tr>
+                    ))
+                }
+
+            </tbody>
+
+        </table>
+    
+        ) : 
+        
+(
+        <div className="
+            text-center
+            text-gray-500
+            p-10
+        ">
+
+            No Results Found
+
+        </div>
+    )
+}
+
+    </div>
+)}
+
+<br/>
+{
+    (role =="super_admin") &&
+(<>
+
+{/*Forecast Scheduler*/}
+<br/>
+<div className="
+    bg-white
+    rounded-xl
+    shadow-lg
+    p-6
+">
+
+    <h2 className="
+        text-xl
+        font-bold
+        mb-4
+    ">
+        Forecast Schedule
+    </h2>
+
+    <div className="mb-4">
+
+        <label className="block mb-2">
+            Interval Type
+        </label>
+
+        <select
+
+            value={intervalType}
+
+            onChange={(e)=>
+                setIntervalType(
+                    e.target.value
+                )
+            }
+
+            className="
+                border
+                p-2
+                rounded
+                w-full
+            "
+        >
+
+            <option value="minutes">
+                Minutes
+            </option>
+
+            <option value="hours">
+                Hours
+            </option>
+
+            <option value="days">
+                Days
+            </option>
+
+            <option value="weeks">
+                Weeks
+            </option>
+
+        </select>
+
+    </div>
+
+
+    <div className="mb-4">
+
+        <label className="block mb-2">
+            Interval Value
+        </label>
+
+        <input
+
+            type="number"
+
+            value={intervalValue}
+
+            onChange={(e)=>
+                setIntervalValue(
+                    e.target.value
+                )
+            }
+
+            className="
+                border
+                p-2
+                rounded
+                w-full
+            "
+        />
+
+    </div>
+
+    <button
+
+        onClick={updateSchedule}
+
+        className="
+            bg-green-600
+            text-white
+            px-4
+            py-2
+            rounded
+        "
+    >
+
+        Save Schedule
+
+    </button>
+
+</div>
+</>)
+}
+
 <br/>
 {/*Filter Method*/}
 <div className="
@@ -1274,6 +1764,232 @@ return (
   </ResponsiveContainer>
 
 </div>
+
+<br/>
+
+{/*Model Comparison*/}
+<div className="
+
+    bg-white
+    dark:bg-gray-800
+
+    rounded-xl
+    shadow-lg
+
+    p-6
+
+">
+
+    <h2 className="
+
+        text-xl
+        font-bold
+
+        mb-4
+
+        text-gray-800
+        dark:text-white
+
+    ">
+
+        Forecast Model Comparison
+
+    </h2>
+
+    <ResponsiveContainer
+        width="100%"
+        height={350}
+    >
+
+        <LineChart
+            data={modelComparison}
+        >
+
+            <CartesianGrid
+                strokeDasharray="3 3"
+            />
+
+            <XAxis
+                dataKey="date"
+            />
+
+            <YAxis />
+
+            <Tooltip />
+
+            <Legend />
+
+            <Line
+
+                type="monotone"
+
+                dataKey="prophet"
+
+                name="Prophet"
+
+            />
+
+            <Line
+
+                type="monotone"
+
+                dataKey="linear_regression"
+
+                name="Linear Regression"
+
+            />
+
+            <Line
+
+                type="monotone"
+
+                dataKey="moving_average"
+
+                name="Moving Average"
+
+            />
+
+            <Line
+
+                type="monotone"
+
+                dataKey="ensemble"
+
+                name="Ensemble"
+
+            />
+
+        </LineChart>
+
+    </ResponsiveContainer>
+
+</div>
+
+<br/>
+{
+    (role== "super_admin" || role == "analyst") && 
+    (<>
+
+{/*Alert Message*/}    
+<div
+    className="
+        bg-white
+        dark:bg-gray-800
+        rounded-xl
+        shadow-lg
+        p-6
+    "
+>
+
+    <div className="
+        flex
+        items-center
+        justify-between
+        mb-4
+    ">
+
+        <h2 className="
+            text-xl
+            font-bold
+            text-gray-800
+            dark:text-white
+        ">
+            Alerts
+        </h2>
+
+        <span className="
+            bg-red-500
+            text-white
+            text-xs
+            px-2
+            py-1
+            rounded-full
+        ">
+            {alerts.length}
+        </span>
+
+    </div>
+
+    {
+        alerts.length > 0 ? (
+
+            alerts.map((alert, index) => (
+
+                <div
+                    key={index}
+                    className="
+                        border-l-4
+                        border-red-500
+                        bg-gray-50
+                        dark:bg-gray-700
+                        rounded-lg
+                        p-4
+                        mb-3
+                        hover:shadow-md
+                        transition
+                    "
+                >
+
+                    <div className="
+                        flex
+                        justify-between
+                        items-start
+                    ">
+
+                        <div>
+
+                            <p className="
+                                font-semibold
+                                text-red-600
+                            ">
+                                {alert.alert_type || "High Demand Alert"}
+                            </p>
+
+                            <p className="
+                                text-gray-700
+                                dark:text-gray-200
+                                mt-1
+                            ">
+                                {alert.message}
+                            </p>
+
+                        </div>
+
+                        <span className="
+                            text-xs
+                            text-gray-500
+                        ">
+                            {alert.created_at
+                                ? new Date(alert.created_at)
+                                      .toLocaleDateString()
+                                : ""}
+                        </span>
+
+                    </div>
+
+                </div>
+
+            ))
+
+        ) : (
+
+            <div className="
+                text-center
+                text-gray-500
+                py-8
+            ">
+                No alerts available
+            </div>
+
+        )
+    }
+
+</div>
+
+    </>)
+}
+
+
 <br/>
 { 
     (role == "super_admin" || role == "analyst") &&
@@ -1786,6 +2502,1134 @@ return (
 </div>
 
 <br/>
+
+{(role== "super_admin" || role == "analyst") && 
+    (<>
+    <div className="
+
+    mt-4
+
+    p-4
+
+    rounded-lg
+
+    bg-gray-50
+    dark:bg-gray-700
+
+">
+
+    <p className="
+
+        text-gray-700
+        dark:text-gray-200
+
+        font-medium
+
+    ">
+
+        AI Suggestion:
+
+    </p>
+
+    <p className="
+
+        mt-2
+
+        text-lg
+        font-bold
+
+        text-indigo-600
+
+    ">
+
+{
+    inventoryOptimization && (
+
+        <div className="
+
+            bg-white
+            dark:bg-gray-800
+
+            rounded-xl
+            shadow-lg
+
+            p-6
+
+        ">
+
+            <h2 className="
+
+                text-xl
+                font-bold
+
+                mb-4
+
+                text-gray-800
+                dark:text-white
+
+            ">
+
+                AI Inventory Optimization
+
+            </h2>
+
+            <div className="space-y-3">
+
+                <p className="
+
+                    text-gray-700
+                    dark:text-gray-300
+
+                ">
+
+                    Current Stock:
+
+                    <span className="
+                        font-semibold
+                        ml-2
+                    ">
+
+                        {
+
+                            inventoryOptimization
+                            .total_stock
+
+                        }
+
+                    </span>
+
+                </p>
+
+                <p className="
+
+                    text-gray-700
+                    dark:text-gray-300
+
+                ">
+
+                    Projected Demand:
+
+                    <span className="
+                        font-semibold
+                        ml-2
+                    ">
+
+                        {
+
+                            Math.round(
+
+                                inventoryOptimization
+                                .projected_demand
+
+                            )
+
+                        }
+
+                    </span>
+
+                </p>
+
+                <div className="mt-4">
+
+                    {
+
+                        inventoryOptimization
+                        .suggestion ===
+                        "Order More Inventory"
+
+                        ?
+
+                        <span className="
+
+                            bg-green-100
+                            text-green-700
+
+                            px-4
+                            py-2
+
+                            rounded-full
+
+                        ">
+
+                            🚚 Order More Inventory
+
+                        </span>
+
+                        :
+
+                        inventoryOptimization
+                        .suggestion ===
+                        "Reduce Purchasing"
+
+                        ?
+
+                        <span className="
+
+                            bg-red-100
+                            text-red-700
+
+                            px-4
+                            py-2
+
+                            rounded-full
+
+                        ">
+
+                            📦 Reduce Purchasing
+
+                        </span>
+
+                        :
+
+                        <span className="
+
+                            bg-blue-100
+                            text-blue-700
+
+                            px-4
+                            py-2
+
+                            rounded-full
+
+                        ">
+
+                            ✅ Maintain Current Inventory
+
+                        </span>
+
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    )
+}
+
+    </p>
+
+</div>
+    </>)}
+
+
+<br/>
+{ (role== "super_admin" || role == "analyst") && 
+    (<>
+    <div className="
+
+    bg-white
+    dark:bg-gray-800
+
+    rounded-xl
+    shadow-lg
+
+    p-6
+
+">
+
+    <h2 className="
+
+        text-xl
+        font-bold
+        mb-4
+
+        text-gray-800
+        dark:text-white
+
+    ">
+
+        AI Demand Recommendations
+
+    </h2>
+
+    {
+
+        recommendations.length > 0 ?
+
+        recommendations.slice(0,5).map(
+
+            (item,index)=>(
+
+                <div
+
+                    key={index}
+
+                    className="
+
+                        border-b
+                        dark:border-gray-700
+
+                        py-3
+
+                    "
+                >
+
+                    <div className="
+
+                        flex
+                        justify-between
+                        items-center
+
+                    ">
+
+                        <div>
+
+                            <p className="
+
+                                font-semibold
+                                text-gray-800
+                                dark:text-white
+
+                            ">
+
+                                {item.forecast_date}
+
+                            </p>
+
+                            <p className="
+
+                                text-sm
+                                text-gray-500
+                                dark:text-gray-400
+
+                            ">
+
+                                Predicted Demand:
+
+                                {" "}
+
+                                {Number(
+                                    item.predicted_demand
+                                ).toFixed(2)}
+
+                            </p>
+
+                        </div>
+
+                        {
+
+                            item.recommendation ===
+                            "Increase Inventory"
+
+                            ?
+
+                            <span className="
+
+                                bg-green-100
+                                text-green-700
+
+                                px-3
+                                py-1
+
+                                rounded-full
+                                text-sm
+
+                            ">
+
+                                📈 Increase
+
+                            </span>
+
+                            :
+
+                            item.recommendation ===
+                            "Reduce Inventory"
+
+                            ?
+
+                            <span className="
+
+                                bg-red-100
+                                text-red-700
+
+                                px-3
+                                py-1
+
+                                rounded-full
+                                text-sm
+
+                            ">
+
+                                📉 Reduce
+
+                            </span>
+
+                            :
+
+                            <span className="
+
+                                bg-blue-100
+                                text-blue-700
+
+                                px-3
+                                py-1
+
+                                rounded-full
+                                text-sm
+
+                            ">
+
+                                ➖ Maintain
+
+                            </span>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            )
+
+        )
+
+        :
+
+        <div className="
+
+            text-center
+            text-gray-500
+
+            p-6
+
+        ">
+
+            No Recommendations Available
+
+        </div>
+
+    }
+
+</div>
+    </>)
+}
+
+
+<br/>
+{
+    (role == "super_admin" || role == "analyst") && 
+    (<>
+
+{
+    stockRisk && (
+
+        <div className="
+
+            bg-white
+            dark:bg-gray-800
+
+            rounded-xl
+            shadow-lg
+
+            p-6
+
+        ">
+
+            <h2 className="
+
+                text-lg
+                font-bold
+                mb-4
+
+                text-gray-800
+                dark:text-white
+
+            ">
+
+                Global Inventory Risk
+
+            </h2>
+
+            <div className="space-y-2">
+
+                <p className="
+                    text-gray-700
+                    dark:text-gray-300
+                ">
+
+                    Total Stock:
+
+                    <span className="
+                        font-semibold
+                        ml-2
+                    ">
+
+                        {stockRisk.total_stock}
+
+                    </span>
+
+                </p>
+
+                <p className="
+                    text-gray-700
+                    dark:text-gray-300
+                ">
+
+                    Projected Demand:
+
+                    <span className="
+                        font-semibold
+                        ml-2
+                    ">
+
+                        {stockRisk.projected_demand}
+
+                    </span>
+
+                </p>
+
+                <p className="
+                    text-gray-700
+                    dark:text-gray-300
+                ">
+
+                    Remaining Stock:
+
+                    <span className="
+                        font-semibold
+                        ml-2
+                    ">
+
+                        {stockRisk.remaining_stock}
+
+                    </span>
+
+                </p>
+
+                <div className="mt-4">
+
+                    {
+
+                        stockRisk.risk === "Low" ?
+
+                        <span className="
+                            bg-green-100
+                            text-green-700
+                            px-3
+                            py-1
+                            rounded-full
+                        ">
+
+                            🟢 Low Risk
+
+                        </span>
+
+                        :
+
+                        stockRisk.risk === "Medium" ?
+
+                        <span className="
+                            bg-yellow-100
+                            text-yellow-700
+                            px-3
+                            py-1
+                            rounded-full
+                        ">
+
+                            🟡 Medium Risk
+
+                        </span>
+
+                        :
+
+                        <span className="
+                            bg-red-100
+                            text-red-700
+                            px-3
+                            py-1
+                            rounded-full
+                        ">
+
+                            🔴 High Risk
+
+                        </span>
+
+                    }
+
+                </div>
+
+            </div>
+
+        </div>
+
+    )
+}        
+    
+    </>)
+}
+
+<br/>
+
+{
+    (role=="super_admin" || role == "analyst") &&
+    
+    (<>
+    {/*Demand Spike Prediction*/}
+    <div className="
+
+    bg-white
+    dark:bg-gray-800
+
+    rounded-xl
+    shadow-lg
+
+    p-6
+
+">
+
+    <h2 className="
+
+        text-xl
+        font-bold
+        mb-4
+
+        text-gray-800
+        dark:text-white
+
+    ">
+
+        Demand Spike Alerts
+
+    </h2>
+
+    {
+
+        demandSpikes.length > 0 ?
+
+        demandSpikes.map(
+
+            (spike,index)=>(
+
+                <div
+
+                    key={index}
+
+                    className="
+
+                        border-b
+                        dark:border-gray-700
+
+                        py-3
+
+                    "
+                >
+
+                    <div className="
+
+                        flex
+                        justify-between
+                        items-center
+
+                    ">
+
+                        <div>
+
+                            <p className="
+
+                                font-semibold
+                                text-gray-800
+                                dark:text-white
+
+                            ">
+
+                                {spike.forecast_date}
+
+                            </p>
+
+                            <p className="
+
+                                text-sm
+                                text-gray-500
+                                dark:text-gray-400
+
+                            ">
+
+                                Demand Increase:
+
+                                {" "}
+
+                                {spike.spike_percentage}%
+
+                            </p>
+
+                        </div>
+
+                        {
+
+                            spike.severity === "High" ?
+
+                            <span className="
+
+                                bg-red-100
+                                text-red-700
+
+                                px-3
+                                py-1
+
+                                rounded-full
+                                text-sm
+
+                            ">
+
+                                🔴 High
+
+                            </span>
+
+                            :
+
+                            <span className="
+
+                                bg-yellow-100
+                                text-yellow-700
+
+                                px-3
+                                py-1
+
+                                rounded-full
+                                text-sm
+
+                            ">
+
+                                🟡 Medium
+
+                            </span>
+
+                        }
+
+                    </div>
+
+                </div>
+
+            )
+
+        )
+
+        :
+
+        <div className="
+
+            text-center
+            text-gray-500
+
+            p-6
+
+        ">
+
+            No Demand Spikes Detected
+
+        </div>
+
+    }
+
+</div>
+    </>)
+
+}
+
+<br/>
+
+{
+customerBehavior && (
+
+<div className="
+
+    bg-white
+    dark:bg-gray-800
+
+    rounded-xl
+    shadow-lg
+
+    p-6
+
+">
+
+    <h2 className="
+
+        text-xl
+        font-bold
+
+        mb-4
+
+        text-gray-800
+        dark:text-white
+
+    ">
+
+        Customer Buying Behavior
+
+    </h2>
+
+    <div className="space-y-3">
+
+        <p className="
+
+            text-gray-700
+            dark:text-gray-300
+
+        ">
+
+            Total Customers:
+
+            <span className="
+                font-semibold
+                ml-2
+            ">
+
+                {customerBehavior.total_customers}
+
+            </span>
+
+        </p>
+
+        <p className="
+
+            text-gray-700
+            dark:text-gray-300
+
+        ">
+
+            Repeat Customers:
+
+            <span className="
+                font-semibold
+                ml-2
+            ">
+
+                {customerBehavior.repeat_customers}
+
+            </span>
+
+        </p>
+
+        <p className="
+
+            text-gray-700
+            dark:text-gray-300
+
+        ">
+
+            Top Segment:
+
+            <span className="
+                font-semibold
+                ml-2
+            ">
+
+                {customerBehavior.top_segment}
+
+            </span>
+
+        </p>
+
+        <p className="
+
+            text-gray-700
+            dark:text-gray-300
+
+        ">
+
+            Top Gender:
+
+            <span className="
+                font-semibold
+                ml-2
+            ">
+
+                {customerBehavior.top_gender}
+
+            </span>
+
+        </p>
+
+        <p className="
+
+            text-gray-700
+            dark:text-gray-300
+
+        ">
+
+            Top Age Group:
+
+            <span className="
+                font-semibold
+                ml-2
+            ">
+
+                {customerBehavior.top_age_group}
+
+            </span>
+
+        </p>
+
+    </div>
+
+</div>
+
+)}
+<br/>
+
+{
+accuracyData && (
+
+<div className="
+
+    bg-white
+    dark:bg-gray-800
+
+    rounded-xl
+    shadow-lg
+
+    p-6
+
+">
+
+    <h2 className="
+
+        text-xl
+        font-bold
+
+        mb-4
+
+        text-gray-800
+        dark:text-white
+
+    ">
+
+        Forecast Accuracy
+
+    </h2>
+
+    <p className="
+
+        text-3xl
+        font-bold
+
+        text-green-600
+
+    ">
+
+        {accuracyData.current_accuracy}%
+
+    </p>
+
+    <p className="
+
+        mt-2
+
+        text-gray-600
+        dark:text-gray-300
+
+    ">
+
+        Average Accuracy:
+
+        {accuracyData.average_accuracy}%
+
+    </p>
+
+</div>
+
+)}
+
+<br/>
+{
+accuracyData && (
+
+<div className="
+
+    bg-white
+    dark:bg-gray-800
+
+    rounded-xl
+    shadow-lg
+
+    p-6
+
+">
+
+    <h2 className="
+
+        text-xl
+        font-bold
+
+        mb-4
+
+        text-gray-800
+        dark:text-white
+
+    ">
+
+        Accuracy Trend
+
+    </h2>
+
+    <ResponsiveContainer
+        width="100%"
+        height={300}
+    >
+
+        <LineChart
+            data={accuracyData.trend}
+        >
+
+            <CartesianGrid
+                strokeDasharray="3 3"
+            />
+
+            <XAxis
+                dataKey="date"
+            />
+
+            <YAxis />
+
+            <Tooltip />
+
+            <Line
+
+                type="monotone"
+
+                dataKey="accuracy"
+
+                name="Accuracy %"
+
+            />
+
+        </LineChart>
+
+    </ResponsiveContainer>
+
+</div>
+
+)}
+
+<br/>
+{/*Confidence Score*/}
+{    
+confidenceData && (
+
+<div className="
+
+    bg-white
+    dark:bg-gray-800
+
+    rounded-xl
+    shadow-lg
+
+    p-6
+
+">
+
+    <h2 className="
+
+        text-xl
+        font-bold
+
+        mb-4
+
+        text-gray-800
+        dark:text-white
+
+    ">
+
+        Forecast Confidence
+
+    </h2>
+
+    <p className="
+
+        text-3xl
+        font-bold
+
+        text-blue-600
+
+    ">
+
+        {confidenceData.average_confidence}%
+
+    </p>
+
+    <p className="
+
+        mt-2
+
+        text-gray-600
+        dark:text-gray-300
+
+    ">
+
+        Model Agreement Score
+
+    </p>
+
+</div>
+
+)}
+
+<br/>
+{/*Business Recommendation*/}
+<div className="
+
+    bg-white
+    rounded-xl
+    shadow-lg
+
+    p-6
+
+">
+
+    <h2 className="
+
+        text-xl
+        font-bold
+
+        mb-4
+
+    ">
+
+        Business Recommendations
+
+    </h2>
+
+    {
+
+        businessRecommendations.map(
+
+            (item,index)=>(
+
+                <div
+
+                    key={index}
+
+                    className="
+
+                        border-b
+                        py-3
+
+                    "
+
+                >
+
+                    <p className="font-semibold">
+
+                        {item.priority}
+
+                    </p>
+
+                    <p>
+
+                        {item.message}
+
+                    </p>
+
+                </div>
+            )
+        )
+    }
+
+</div>
+
 <br/>
 {
     (role == "super_admin" || role == "analyst") &&
@@ -1918,6 +3762,7 @@ return (
 
 </>) 
 }
+
 <br/>
 {/*Forecast History Comparison*/}
 <div className={`${darkMode?"bg-gray-900":"bg-white"} rounded-2xl shadow-lg p-6 `}>

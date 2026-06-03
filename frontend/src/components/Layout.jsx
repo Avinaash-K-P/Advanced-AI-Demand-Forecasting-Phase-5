@@ -168,6 +168,20 @@ function Layout({ children }) {
             Manage Users
           </Link>
 
+            <Link
+            to="/admin/activity-logs"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Activity Logs
+          </Link>      
+
           <Link
             to="/admin/sales"
             className="
@@ -208,6 +222,20 @@ function Layout({ children }) {
             "
           >
             Manage Reports
+          </Link>
+
+          <Link
+            to="/admin/integration-managment"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Manage Integration
           </Link>
 
           </>)
@@ -310,6 +338,21 @@ function Layout({ children }) {
           </>)
         
         }
+
+          <Link
+            to="/profile"
+            className="
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            Profile
+          </Link>
+
 
           <Link
             to="/download-summary"

@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import Dashboard from './pages/User_Dashboard';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import Profile from './pages/Profile';
 import UploadDataset from './pages/UploadDataset';
 import Forecast from './pages/Forecast';
 import Reports from './pages/Reports';
@@ -13,6 +14,11 @@ import AdminReports from './pages/Admin_Reports';
 import DownloadSummary from './pages/Analytics_Summary';
 import Unauthorized from './pages/Unauthorized';
 import ProtectedRoute from './components/Protected_routes';
+import IntegrationManagement from './pages/Integration_Management';
+import ActivityLogs from './pages/Activity_Logs';
+import ForgotPassword from './pages/forgot_password';
+import ResetPassword from './pages/reset_password';
+
 
 function App() {
 
@@ -31,6 +37,23 @@ function App() {
           path="/register"
           element={<Register />}
         />
+
+        <Route
+          path="/forgot-password"
+          element={<ForgotPassword/>}
+        />
+
+        <Route
+          path="/reset-password"
+          element={<ResetPassword/>}
+        />
+
+        <Route
+          path="/profile"
+          element={ <ProtectedRoute allowedRoles={["super_admin","analyst","viewer"]}>
+                   <Profile />
+            </ProtectedRoute>}
+          />
 
         <Route
           path="/dashboard"
@@ -89,6 +112,15 @@ function App() {
         />
 
         <Route
+          path="/admin/activity-logs"
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+                   <ActivityLogs />
+            </ProtectedRoute>
+          }
+        />    
+
+        <Route
           path="/admin/sales"
           element={
             <ProtectedRoute allowedRoles={["super_admin"]}>
@@ -114,6 +146,15 @@ function App() {
           }
         />
 
+        <Route
+          path="/admin/integration-managment"
+          element={
+            <ProtectedRoute allowedRoles={["super_admin"]}>
+                   <IntegrationManagement />
+            </ProtectedRoute>
+          }
+        />
+        
         <Route
         path="/download-summary"
         element={

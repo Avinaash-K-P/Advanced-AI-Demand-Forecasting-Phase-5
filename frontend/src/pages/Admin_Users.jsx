@@ -23,7 +23,6 @@ const fetchUsers = async () => {
 
     try{
         const token = localStorage.getItem("token")
-
         const response = await axios.get(
             "http://127.0.0.1:8000/admin/users",
             {
@@ -48,10 +47,51 @@ const fetchUsers = async () => {
     }
 }
 
+//Update function
+const updateUserStatus = async (
+    userId,
+    status
+) => {
+
+    try {
+
+        const token =
+        localStorage.getItem("token");
+
+        await axios.put(
+
+            `http://127.0.0.1:8000/admin/users/${userId}/status`,
+
+            {
+                status
+            },
+
+            {
+                headers: {
+                    Authorization:
+                    `Bearer ${token}`
+                }
+            }
+        );
+
+        fetchUsers();
+
+    }
+
+    catch(error){
+
+        console.log(error);
+
+    }
+
+};
+
 
 useEffect(() => {
     fetchUsers()
 }, [filters])
+
+
 
 return(
 
@@ -229,7 +269,7 @@ return(
                             </th>
 
                             <th className="p-4 text-left">
-                                Actions
+                                Status
                             </th>
 
                         </tr>
@@ -274,31 +314,35 @@ return(
 
                                 </td>
 
-                                <td className="p-4">
-                <button
-
-        onClick={() =>
-            navigate(
-                `/edit-user/${user.id}`
+                                 <td>
+    <select
+        className="
+            border
+            rounded-md
+            px-2
+            py-1
+        "
+        value={user.status || "active"}
+        onChange={(e) =>
+            updateUserStatus(
+                user.id,
+                e.target.value
             )
         }
-
-        className="
-            px-4
-            py-2
-            rounded-xl
-            bg-blue-600
-            hover:bg-blue-700
-            text-white
-            transition
-        "
     >
+        <option value="active">
+            Active
+        </option>
 
-        Edit
+        <option value="inactive">
+            Inactive
+        </option>
 
-            </button>
-
-                                </td>
+        <option value="suspended">
+            Suspended
+        </option>
+    </select>
+</td>           
 
                             </tr>
 
