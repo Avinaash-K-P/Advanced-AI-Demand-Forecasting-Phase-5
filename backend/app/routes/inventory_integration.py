@@ -270,7 +270,8 @@ def inventory_webhook(
 
     payload: dict,
 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+      user = Depends(verify_role(["super_admin"]))
 ):
 
     product = payload.get(

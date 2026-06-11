@@ -21,6 +21,8 @@ class Sales(Base):
     stock_available = Column(Integer,default=100)
 
     customer_id = Column(String(100))
+
+    product_id = Column(String(100))
     
     transaction_id = Column(String(100))
     

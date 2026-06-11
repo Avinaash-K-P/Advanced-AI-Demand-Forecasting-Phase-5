@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.db.database import get_db
+from app.core.security import verify_role
 from app.models.alert_settings import AlertSettings
 from app.utils.response import success_response
 from app.schemas.alert_settings import AlertSettingsUpdate
@@ -11,7 +12,8 @@ router = APIRouter(prefix="/alerts", tags=["alerts"])
     "/alert-settings"
 )
 def get_alert_settings(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    user = Depends(verify_role(["super_admin"]))
 ):
     settings = db.query(AlertSettings).first()
     return success_response(
@@ -28,7 +30,9 @@ def update_alert_settings(
 
     payload: AlertSettingsUpdate,
 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+
+    user = Depends(verify_role(["super_admin"]))
 
 ):
     settings = db.query(AlertSettings).first()

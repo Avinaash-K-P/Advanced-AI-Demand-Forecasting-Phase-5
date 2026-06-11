@@ -11,19 +11,20 @@ from app.schemas.forecast import ForecastScheduleUpdate
 from app.core.security import verify_role
 from app.utils.response import error_response, success_response
 from app.utils.logger import log_api_activity
-from app.services.forecast_service import ( 
-    preprocess_sales_data,
-    train_forecast_model,
-    evaluate_forecast_accuracy
-)    
+from app.services.preprocessing_service import preprocess_sales_data
+from app.services.training_service import (
+    train_prophet,
+    train_linear_regression,
+    compute_moving_average,
+    build_ensemble_forecast
+)
+from app.services.evaluation_service import evaluate_forecast_accuracy
 from datetime import datetime
 from fastapi_cache.decorator import cache
 from app.utils.apscheduler import (
     scheduler,
     load_forecast_schedule
 )
-
-
 
 router = APIRouter(prefix="/forecast", tags=["forecast"])
 
@@ -39,7 +40,6 @@ def preprocess_data(
     List = []
 
     for row in sales_data:
-
 
         List.append({
             "sales_date": row.sales_date,
@@ -175,7 +175,14 @@ def generate_forecast(
     processed_df = preprocess_sales_data(df)
 
     # Train forecasting model
-    forecast_df = train_forecast_model(processed_df)
+    
+    prophet_df = train_prophet(processed_df)
+    lr_df = train_linear_regression(processed_df)
+    ma_df = compute_moving_average(processed_df)
+
+    esemble_df = build_ensemble_forecast(prophet_df, lr_df, ma_df)
+
+    forecast_df = esemble_df
 
      # Store forecast results
     forecast_records = []

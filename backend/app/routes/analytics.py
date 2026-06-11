@@ -818,7 +818,8 @@ def get_top_products(
 #Alert display
 @router.get("/get-alert")
 def get_alerts(
-    db:Session = Depends(get_db)
+    db:Session = Depends(get_db),
+    user = Depends(verify_role(["super_admin","analyst","viewer"]))
 ):
 
     alerts = db.query(Alert).order_by(Alert.created_at.desc()).all()
