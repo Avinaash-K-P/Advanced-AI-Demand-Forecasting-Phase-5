@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Layout from "../components/Layout";
+import { getThemeStyles } from "../components/ThemeStyles";
 
 function Profile() {
-
+    
+    const darkMode =localStorage.getItem("theme") === "dark";
+    const styles = getThemeStyles(darkMode);
     const [profile, setProfile] = useState({
 
         username: "",
@@ -116,20 +119,20 @@ const updateProfile = async () => {
 return (
 
 <Layout>
-<div className="
+<div className={`
+
+    ${styles.card}
 
     max-w-2xl
     mx-auto
-
-    bg-white
 
     rounded-xl
 
     shadow-lg
 
     p-6
-
-">
+`}
+>
 
     <h2 className="
 
@@ -233,8 +236,6 @@ return (
             className="
 
                 w-full
-
-                bg-gray-100
 
                 border
 

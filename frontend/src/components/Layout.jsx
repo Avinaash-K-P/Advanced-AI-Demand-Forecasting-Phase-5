@@ -2,11 +2,34 @@ import { Link, useNavigate } from "react-router-dom";
 import { useState,useEffect } from "react";
 import NotificationDropdown from "./NotificationDropDown";
 import React from "react";
+import {
+  FaTachometerAlt,
+  FaChartLine,
+  FaUsersCog,
+  FaClipboardList,
+  FaFlask,
+  FaFolderOpen,
+  FaUserFriends,
+  FaUpload,
+  FaBrain,
+  FaDownload,
+  FaUserCircle,
+  FaCog,
+  FaSignOutAlt
+} from "react-icons/fa";
+import { getThemeStyles } from "./ThemeStyles";
+import {toast} from "react-toastify";
+
+
 function Layout({ children }) {
 
   const navigate = useNavigate();
 
+  const username = localStorage.getItem("username"); // To display username in the dashboard
+
   const role = localStorage.getItem("role");
+
+  const [showMenu,setShowMenu] = useState(false);
 
   const handleLogout = () => {
 
@@ -16,6 +39,8 @@ function Layout({ children }) {
   };
 
   const [darkMode, setDarkMode] = useState(false);
+  
+  const styles = getThemeStyles(darkMode);
 
   const toggleTheme = () => {
 
@@ -45,6 +70,19 @@ function Layout({ children }) {
 
   useEffect(() => {
 
+  const token = localStorage.getItem("token");
+
+  if (!token) {
+
+    navigate("/");
+    toast.error("Please log in to access the dashboard.");
+  }
+
+  }, []);
+
+
+  useEffect(() => {
+
     const savedTheme =
         localStorage.getItem("theme");
 
@@ -58,57 +96,31 @@ function Layout({ children }) {
 
 }, []);
 
-
-  useEffect(() => {
-
-  const token = localStorage.getItem("token");
-
-  if (!token) {
-
-    navigate("/");
-    alert("Please log in to access the dashboard.");
-  }
-
-  }, []);
-
-
   return (
 
    <div
   className={`
-
     min-h-screen
     flex
     transition-all
     duration-300
-
-    ${darkMode
-
-      ?
-
-      "bg-gray-950 text-white"
-
-      :
-
-      "bg-gray-100 text-black"
-    }
-
-  `}
+    
+     ${styles.layout}
+    `}
 >
 
       {/* Sidebar */}
    
-   <div className={`
+   <div className={`   
 
+    ${styles.navBar}
     fixed
     top-0
     left-0
     h-screen
-    w-64
+    w-56
 
     overflow-y-auto
-
-    text-white
     p-6
 
     hidden
@@ -117,32 +129,60 @@ function Layout({ children }) {
     shadow-2xl
     transition-all
     duration-300
+    text-center
 
-    ${darkMode
+   `}
+    >
 
-      ?
 
-      "bg-gradient-to-b from-gray-950 via-gray-900 to-black"
-
-      :
-
-      "bg-gradient-to-b from-emerald-950 via-green-900 to-emerald-800"
-    }
-
-`}>
-
+        { role =="super_admin" && (
+        
         <h1 className="text-2xl font-bold mb-10">
-          AI Forecast
+            Admin Panel
         </h1>
 
+         )
+        }
+
+
+      {(role === "analyst" || role === "viewer") && (
+
+    <h1 className="text-2xl font-bold mb-10">
+        AI Forecast
+    </h1>
+
+)}
+
         <nav className="space-y-4">
+
+        <Link
+            to="/dashboard"
+            className="
+             flex 
+             items-center gap-3 p-3
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            <FaTachometerAlt className="shrink-0 text-lg"/>
+            <span className="truncate">Dashboard</span> 
+        </Link>
+
+
+
 
         {/*For Admin Access*/
            role === "super_admin" &&
            ( <>
-                 <Link
-            to="/admin/dashboard"
+
+                   <Link
+            to="/executive-dashboard"
             className="
+            flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -151,12 +191,14 @@ function Layout({ children }) {
              transition
             "
           >
-            Dashboard
+            <FaChartLine className="shrink-0 text-lg"/>
+            <span className="truncate">Executive</span> 
           </Link>
 
             <Link
-            to="/admin/users"
+            to="/admin/management"
             className="
+             flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -165,12 +207,14 @@ function Layout({ children }) {
              transition
             "
           >
-            Manage Users
+            <FaUsersCog />
+           <span className="truncate">Manage</span> 
           </Link>
 
             <Link
             to="/admin/activity-logs"
             className="
+             flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -178,55 +222,15 @@ function Layout({ children }) {
              hover:text-green-200
              transition
             "
-          >
-            Activity Logs
-          </Link>      
-
-          <Link
-            to="/admin/sales"
-            className="
-             block px-4
-             py-3
-             rounded-xl
-             hover:bg-white/10
-             hover:text-green-200
-             transition
-            "
-          >
-            Manage Dataset
-          </Link>
-
-           <Link
-            to="/admin/forecasts"
-            className="
-             block px-4
-             py-3
-             rounded-xl
-             hover:bg-white/10
-             hover:text-green-200
-             transition
-            "
-          >
-            Manage Forecast 
-          </Link>
-
-           <Link
-            to="/admin/reports"
-            className="
-             block px-4
-             py-3
-             rounded-xl
-             hover:bg-white/10
-             hover:text-green-200
-             transition
-            "
-          >
-            Manage Reports
+          > 
+            <FaClipboardList className="shrink-0 text-lg"/>
+            <span className="truncate">Logs</span> 
           </Link>
 
           <Link
-            to="/admin/integration-managment"
+            to="/forecast-scenario"
             className="
+            flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -235,8 +239,43 @@ function Layout({ children }) {
              transition
             "
           >
-            Manage Integration
+            <FaFlask className="shrink-0 text-lg"/>
+            <span className="truncate">Scenario</span> 
           </Link>
+
+
+          <Link
+            to="/workspace"
+            className="
+             flex items-center gap-3 p-3
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            <FaFolderOpen className="shrink-0 text-lg"/>
+           <span className="truncate">Workspace</span> 
+          </Link>
+
+          <Link
+            to="/collaboration"
+            className="
+            flex items-center gap-3 p-3
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            <FaUserFriends className="shrink-0 text-lg"/>
+            <span className="truncate">Collabs</span> 
+          </Link>
+
 
           </>)
         }
@@ -245,9 +284,11 @@ function Layout({ children }) {
 
         role ==="analyst" &&
         ( <>
+
           <Link
-            to="/dashboard"
+            to="/executive-dashboard"
             className="
+            flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -256,12 +297,14 @@ function Layout({ children }) {
              transition
             "
           >
-            Dashboard
+            <FaChartLine className="shrink-0 text-lg"/>
+            <span className="truncate">Executive</span> 
           </Link>
 
           <Link
             to="/upload"
             className="
+            flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -270,12 +313,14 @@ function Layout({ children }) {
              transition
             "
           >
-            Upload Dataset
+            <FaUpload className="shrink-0 text-lg"/>
+            <span className="truncate">Upload</span> 
           </Link>
 
           <Link
             to="/forecast"
             className="
+            flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -284,12 +329,47 @@ function Layout({ children }) {
              transition
             "
           >
-            Forecast
+            <FaBrain className="shrink-0 text-lg"/>
+            <span className="truncate">Forecast</span> 
+          </Link>
+
+                    <Link
+            to="/forecast-scenario"
+            className="
+            flex items-center gap-3 p-3
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            <FaFlask className="shrink-0 text-lg"/>
+            <span className="truncate">Scenario</span> 
+          </Link>
+
+
+          <Link
+            to="/workspace"
+            className="
+             flex items-center gap-3 p-3
+             block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition
+            "
+          >
+            <FaFolderOpen className="shrink-0 text-lg"/>
+           <span className="truncate">Workspace</span> 
           </Link>
 
           <Link
-            to="/reports"
+            to="/collaboration"
             className="
+            flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -298,32 +378,17 @@ function Layout({ children }) {
              transition
             "
           >
-            Reports
+            <FaUserFriends className="shrink-0 text-lg"/>
+            <span className="truncate">Collabs</span> 
           </Link>
 
           </>)
         }
 
-        {/* Viewer Access*/
-          role === "viewer" &&
-          (<>
-           <Link
-            to="/dashboard"
-            className="
-             block px-4
-             py-3
-             rounded-xl
-             hover:bg-white/10
-             hover:text-green-200
-             transition
-            "
-          >
-            Dashboard
-          </Link>
-
           <Link
-            to="/reports"
+            to="/download"
             className="
+            flex items-center gap-3 p-3
              block px-4
              py-3
              rounded-xl
@@ -332,75 +397,11 @@ function Layout({ children }) {
              transition
             "
           >
-            Reports
+            <FaDownload className="shrink-0 text-lg"/>
+            <span className="truncate">Downloads</span> 
           </Link>
 
-          </>)
-        
-        }
-
-          <Link
-            to="/profile"
-            className="
-             block px-4
-             py-3
-             rounded-xl
-             hover:bg-white/10
-             hover:text-green-200
-             transition
-            "
-          >
-            Profile
-          </Link>
-
-
-          <Link
-            to="/download-summary"
-            className="
-             block px-4
-             py-3
-             rounded-xl
-             hover:bg-white/10
-             hover:text-green-200
-             transition
-            "
-          >
-            Analytic Summary
-          </Link>
-
-
-          <div className="       
-          block px-4
-             py-3
-             rounded-xl
-             hover:bg-white/10
-             hover:text-green-200
-             transition">
-             <NotificationDropdown />
-          </div>
-      
-          <button
-            onClick={handleLogout}
-            className="
-            mt-10
-            w-full
-            bg-white/10
-            border
-            border-white/20
-            px-4
-            py-3
-            rounded-2xl
-            hover:bg-red-500
-            hover:border-red-500
-            transition
-            font-semibold
-            backdrop-blur-md
-          "
-          >
-            Logout
-          </button>
-
-        <button
+                  <button
 
     onClick={toggleTheme}
 
@@ -421,51 +422,290 @@ function Layout({ children }) {
 
 </button>  
 
-
         </nav>
 
       </div>
 
-      {/* Page Content */}
+{/*Top Bar*/}
+<div className="
+flex-1
+flex
+flex-col
+ml-56
+">
 
-   <div className={`
+    <header
+className={`
+  
+fixed
+top-0
+left-56
+right-0
 
-    ml-64
-    flex-1
-    p-6
-    transition-all
-    duration-300
+h-16
+flex
+items-center
+justify-between
 
-    ${darkMode
+px-8
 
-        ?
+shadow-lg
+z-50
+      ${styles.navBar}
+`}
+>
 
-        "bg-gray-950 text-white"
+        {/* Left */}
 
-        :
+        <div
+        className="
+        text-xl
+        font-semibold
+        "
+        >
 
-        "bg-gray-100 text-black"
+            AI Demand Forecast
+
+
+        </div>
+
+        {/* Right */}
+
+        <div
+        className="
+        flex
+        items-center
+        gap-6
+        "
+        >
+
+
+
+              
+            {/* Notification */}
+
+          { <div className="       
+          block px-4
+             py-3
+             rounded-xl
+             hover:bg-white/10
+             hover:text-green-200
+             transition">
+             <NotificationDropdown />
+          </div> }
+
+            {/* User Dropdown */}
+
+            <div
+            className="
+            relative
+            "
+            >
+    
+    <div
+onClick={() =>
+setShowMenu(!showMenu)
+}
+className="
+cursor-pointer
+font-medium
+"
+>
+
+Welcome {username} ▼
+
+{
+showMenu && (
+
+<div
+className={`
+  ${styles.navBar}
+  absolute
+right-0
+top-10
+
+w-52
+
+text-gray-700
+
+rounded-2xl
+shadow-2xl
+
+border
+border-gray-200
+
+overflow-hidden
+
+z-50`}
+
+>
+
+    {/* User Header */}
+
+    <div
+    className=" 
+    px-4
+    py-3
+
+    bg-gradient-to-r
+    from-emerald-50
+    to-green-100
+
+    border-b
+    "
+    >
+
+        <p className="
+        text-sm
+        text-gray-500
+        ">
+            Signed In
+        </p>
+
+        <p className="
+        font-semibold
+        text-gray-800
+        ">
+            {username}
+        </p>
+
+    </div>
+
+    {/* Profile */}
+
+    <Link
+        to="/profile"
+        className="
+        flex
+        items-center
+        gap-3
+
+        px-4
+        py-3
+
+        hover:bg-green-50
+        hover:text-green-700
+
+        transition
+        duration-200
+        "
+    >
+
+        <FaUserCircle/>
+
+        <span>
+            Profile
+        </span>
+
+    </Link>
+
+     <div className="border-t"></div>
+
+    {(role=="super_admin" || role == "analyst") &&
+    (<>
+            <Link
+        to="/dashboard/settings"
+        className="
+        flex
+        items-center
+        gap-3
+
+        px-4
+        py-3
+
+        hover:bg-green-50
+        hover:text-green-700
+
+        transition
+        duration-200
+        "
+    >
+
+        <FaCog/>
+
+        <span>
+            Widgets
+        </span>
+
+    </Link>  
+
+      </>)
     }
 
 
-`}>
-      
-        {
 
-    React.cloneElement(
+    <div className="border-t"></div>
 
-        children,
+    {/* Logout */}
 
-        { darkMode }
+    <button
 
-    )
+        onClick={handleLogout}
 
+        className="
+        w-full
+
+        flex
+        items-center
+        gap-3
+
+        px-4
+        py-3
+
+        text-left
+
+        hover:bg-red-50
+        hover:text-red-600
+
+        transition
+        duration-200
+        "
+
+    >
+
+        <FaSignOutAlt/>
+
+        <span>
+            Logout
+        </span>
+
+    </button>
+
+</div>
+
+)
 }
 
-      </div>
+
+</div>
+
+
+            </div>
+
+        </div>
+
+</header>
+
+<main
+className={`
+  flex-1
+  p-6
+  pt-20
+  overflow-y-auto
+
+    ${styles.layout}
+  
+  
+  `}
+>
+{children}
+</main>
+
+</div>
 
     </div>
-  );
+  
+);
 }
 
 export default Layout;

@@ -4,8 +4,13 @@ import { Link, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { toast } from "react-toastify";
 import { addNotification } from "../components/AddNotification";
+import { getThemeStyles } from "../components/ThemeStyles";
 
 function UploadDataset() {
+
+  const darkMode =localStorage.getItem("theme") === "dark";
+  
+  const styles = getThemeStyles(darkMode);
 
   const navigate = useNavigate();
 
@@ -70,7 +75,7 @@ function UploadDataset() {
       <div className="flex-1 flex items-center justify-center p-6">
     
 
-        <div className="bg-white rounded-2xl shadow-lg p-10 w-full max-w-xl">
+        <div className={`${styles.card} rounded-2xl shadow-lg p-10 w-full max-w-xl`}>
 
           <h1 className="text-3xl font-bold mb-6 text-center">
             Upload Dataset

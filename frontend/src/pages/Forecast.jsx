@@ -4,9 +4,11 @@ import { Link } from "react-router-dom";
 import Layout from "../components/Layout";
 import {toast} from "react-toastify";
 import { addNotification } from "../components/AddNotification";
+import { getThemeStyles } from "../components/ThemeStyles";
 
 function Forecast() {
-
+  const darkMode =localStorage.getItem("theme") === "dark";
+  const styles = getThemeStyles(darkMode);
   const [forecastData, setForecastData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [forecastDays, setForecastDays] = useState(30);
@@ -72,7 +74,7 @@ function Forecast() {
         </button>
 
         {/* Forecast Table */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 overflow-x-auto">
+        <div className="rounded-2xl shadow-lg p-6 overflow-x-auto">
 
           <table className="w-full">
 

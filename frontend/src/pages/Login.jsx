@@ -36,12 +36,7 @@ function Login() {
   localStorage.setItem("role", (response.data.data.role));
   const role = response.data.data.role;
   
-  if (role === "super_admin") {
-    navigate("/admin/dashboard")
-  }
-  else if(role === "analyst" || role === "viewer") {
-    navigate("/dashboard")
-}
+  navigate("/dashboard")
   toast.success("Login successful!");
   }
 
